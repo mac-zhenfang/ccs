@@ -43,7 +43,7 @@ public class ActivityStreamStore implements IStore {
 		usedTargets = initActivityTarget();
 		for (Target target : usedTargets) {
 			int i = 0;
-			do {
+			do { 
 				String objectName = target.getTargetDisplayName();
 				List<String> verbsOfObjectType = ActivityTypeStore.getStore()
 						.getVerbs(objectName);
