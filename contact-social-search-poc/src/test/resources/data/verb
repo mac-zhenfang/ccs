@@ -1,0 +1,22 @@
+[
+	{
+		"objectName": "meeting",
+		"verbs": ["start", "join"]
+	},
+	{
+		"objectName": "content share",
+		"verbs": ["start", "join"]
+	},
+	{
+		"objectName": "phone call",
+		"verbs": ["dial", "receive"]	
+	},
+	{
+		"objectName": "post",
+		"verbs": ["write", "share"]	
+	},
+	{
+		"objectName": "discussion",
+		"verbs": ["init", "comment"]	
+	}
+]
