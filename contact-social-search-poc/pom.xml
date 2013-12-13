@@ -8,7 +8,6 @@
 		<spring.version>3.2.2.RELEASE</spring.version>
 	</properties>
 	<dependencies>
-
 		<dependency>
 			<groupId>com.tinkerpop.rexster</groupId>
 			<artifactId>rexster-protocol</artifactId>
@@ -121,6 +120,13 @@
 			<groupId>org.springframework</groupId>
 			<artifactId>spring-webmvc</artifactId>
 			<version>${spring.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>edu.stanford.nlp</groupId>
+			<artifactId>edu.stanford.nlp</artifactId>
+			<version>3.3</version>
+			<scope>system</scope>
+			<systemPath>${basedir}/lib/stanford-postagger.jar</systemPath>
 		</dependency>
 	</dependencies>
 </project>
