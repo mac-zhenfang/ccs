@@ -1,0 +1,14 @@
+MileStone 1:
+	1. Simply can be used to search contacts:
+		Vagou who I always have meeting with
+	2. Have a UI to show the relation and search result
+	3. Find a better way to Titan query
+MileStone 2: 
+	1. Have a simliar words list, for example: user might input:
+		Mac who I always have meeting with
+		Mac who I always meet with
+	   'have meeting with' and 'meet with' should have the same meaning
+	2. Test with real contact module
+MileStone 3:
+	1. Test with more activities, meeting should be seperated
+	

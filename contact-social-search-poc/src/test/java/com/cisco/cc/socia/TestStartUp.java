@@ -66,6 +66,5 @@ public class TestStartUp {
 			System.out.println(queryStr);
 			List<Person> persons = service.queryPersons(queryStr);
 			System.out.println(persons);
-		}
-	}
+		}	}
 }
