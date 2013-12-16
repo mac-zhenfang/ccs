@@ -9,13 +9,13 @@ import java.util.UUID;
  * @author zhefang
  *
  */
-public class Target {
+public class Thing {
 	
-	public String getTargetObjectType() {
+	public String getThingObjectType() {
 		return targetObjectType;
 	}
 
-	public void setTargetObjectType(String targetObjectType) {
+	public void setThingObjectType(String targetObjectType) {
 		this.targetObjectType = targetObjectType;
 	}
 
@@ -24,11 +24,11 @@ public class Target {
 	}
 
 
-	public String getTargetDisplayName() {
+	public String getThingDisplayName() {
 		return targetDisplayName;
 	}
 
-	public void setTargetDisplayName(String targetDisplayName) {
+	public void setThingDisplayName(String targetDisplayName) {
 		this.targetDisplayName = targetDisplayName;
 	}
 

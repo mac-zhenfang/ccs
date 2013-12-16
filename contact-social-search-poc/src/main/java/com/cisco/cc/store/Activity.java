@@ -29,11 +29,11 @@ public class Activity {
 	
 	private String verb;
 	
-	private String targetObjectType;
+	private String thingObjectType;
 	
-	private String targetId;
+	private String thingId;
 	
-	private String targetDisplayName;
+	private String thingDisplayName;
 
 	public long getTimestamp() {
 		return timestamp;
@@ -75,27 +75,27 @@ public class Activity {
 		this.verb = verb;
 	}
 
-	public String getTargetObjectType() {
-		return targetObjectType;
+	public String getThingObjectType() {
+		return thingObjectType;
 	}
 
-	public void setTargetObjectType(String targetObjectType) {
-		this.targetObjectType = targetObjectType;
+	public void setThingObjectType(String thingObjectType) {
+		this.thingObjectType = thingObjectType;
 	}
 
-	public String getTargetId() {
-		return targetId;
+	public String getThingId() {
+		return thingId;
 	}
 
-	public void setTargetId(String targetId) {
-		this.targetId = targetId;
+	public void setThingId(String thingId) {
+		this.thingId = thingId;
 	}
 
-	public String getTargetDisplayName() {
-		return targetDisplayName;
+	public String getThingDisplayName() {
+		return thingDisplayName;
 	}
 
-	public void setTargetDisplayName(String targetDisplayName) {
-		this.targetDisplayName = targetDisplayName;
+	public void setThingDisplayName(String thingDisplayName) {
+		this.thingDisplayName = thingDisplayName;
 	}
 }

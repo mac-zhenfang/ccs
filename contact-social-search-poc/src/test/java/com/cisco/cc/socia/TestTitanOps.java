@@ -3,6 +3,10 @@
  */
 package com.cisco.cc.socia;
 
+import static com.thinkaurelius.titan.graphdb.configuration.GraphDatabaseConfiguration.INDEX_BACKEND_KEY;
+import static com.thinkaurelius.titan.graphdb.configuration.GraphDatabaseConfiguration.STORAGE_DIRECTORY_KEY;
+
+import java.io.File;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -11,6 +15,8 @@ import org.apache.commons.configuration.BaseConfiguration;
 import org.apache.commons.configuration.Configuration;
 import org.junit.Test;
 
+import com.cisco.cc.store.Person;
+import com.cisco.cc.store.PersonStore;
 import com.thinkaurelius.titan.core.TitanFactory;
 import com.thinkaurelius.titan.core.TitanGraph;
 import com.thinkaurelius.titan.core.TitanKey;
@@ -51,47 +57,61 @@ public class TestTitanOps {
 		client.execute("g.clear()");
 	}
 
-	@Test
-	public void testGet2FromVertex() throws Exception {
+	private TitanGraph initGraph() {
+		String directory = "c:\\a";
 		BaseConfiguration config = new BaseConfiguration();
 		Configuration storage = config
 				.subset(GraphDatabaseConfiguration.STORAGE_NAMESPACE);
+		// configuring local backend
 		storage.setProperty(GraphDatabaseConfiguration.STORAGE_BACKEND_KEY,
-				"cassandra");
-		storage.setProperty(GraphDatabaseConfiguration.HOSTNAME_KEY,
-				"10.224.194.174");
-
+				"local");
+		storage.setProperty(GraphDatabaseConfiguration.STORAGE_DIRECTORY_KEY,
+				directory);
+		// configuring elastic search index
 		Configuration index = storage.subset(
 				GraphDatabaseConfiguration.INDEX_NAMESPACE).subset(INDEX_NAME);
-		index.setProperty(GraphDatabaseConfiguration.INDEX_BACKEND_KEY,
-				"elasticsearch");
-		index.setProperty(GraphDatabaseConfiguration.HOSTNAME_KEY,
-				"10.224.194.171");
-		index.setProperty("local-mode", false);
-		index.setProperty("client-only", true);
+		index.setProperty(INDEX_BACKEND_KEY, "elasticsearch");
+		index.setProperty("local-mode", true);
+		index.setProperty("client-only", false);
+		index.setProperty(STORAGE_DIRECTORY_KEY, directory + File.separator
+				+ "es");
 		// TitanGraph graph =
 		// TitanFactory.open("titan-cassandra-es.properties");
 		TitanGraph graph = TitanFactory.open(config);
 
-		Iterator<Vertex> vertices = graph.getVertices("vid",
-				"7886071b-d08c-4c3b-8751-e4caf0a98a3e").iterator();
+		return graph;
+	}
 
+	@Test
+	public void testGet2FromVertex() throws Exception {
+		PersonStore.getStore().init();
+		Person me = PersonStore.getStore().getMe();
+		TitanGraph graph = initGraph();
+		String id = "d6d2e702-ee8d-45e0-a005-080925bed274";
+		// Me (out)->(edges)->(in)target(in)<-(edge)<-(out)person
+		Iterator<Vertex> vertices = graph.getVertices("vid", id)
+				.iterator();
+		// Me
 		Vertex v = vertices.next();
 
 		System.out.println(v.getProperty("name") + " " + v.getProperty("vid"));
-		// verb
+		// Me (out)->(edges)
 		Iterator<Edge> iter = v.getEdges(Direction.OUT, "join").iterator();
-
+		//
 		while (iter.hasNext()) {
+
 			Edge edge = iter.next();
+			// Me (out)->(edges)->(in)target
 			Vertex ver = edge.getVertex(Direction.IN);
+			// Me (out)->(edges)->(in)target(in)<-(edge)
 			Iterator<Edge> iter2 = ver.getEdges(Direction.IN, "join", "start")
 					.iterator();
 			while (iter2.hasNext()) {
+				// Me (out)->(edges)->(in)target(in)<-(edge)<-(out)person
 				Vertex vv = iter2.next().getVertex(Direction.OUT);
 				if (!vv.getProperty("vid").equals(
-						"7886071b-d08c-4c3b-8751-e4caf0a98a3e")) {
-					System.out.println(vv.getProperty("name"));
+						id)) {
+					System.out.println(vv.getProperty("name") + " " + vv.getProperty("vid"));
 				}
 
 			}
@@ -107,32 +127,17 @@ public class TestTitanOps {
 
 	@Test
 	public void testGetSomethingFromVertex() throws Exception {
-		BaseConfiguration config = new BaseConfiguration();
-		Configuration storage = config
-				.subset(GraphDatabaseConfiguration.STORAGE_NAMESPACE);
-		storage.setProperty(GraphDatabaseConfiguration.STORAGE_BACKEND_KEY,
-				"cassandra");
-		storage.setProperty(GraphDatabaseConfiguration.HOSTNAME_KEY,
-				"10.224.194.174");
 
-		Configuration index = storage.subset(
-				GraphDatabaseConfiguration.INDEX_NAMESPACE).subset(INDEX_NAME);
-		index.setProperty(GraphDatabaseConfiguration.INDEX_BACKEND_KEY,
-				"elasticsearch");
-		index.setProperty(GraphDatabaseConfiguration.HOSTNAME_KEY,
-				"10.224.194.171");
-		index.setProperty("local-mode", false);
-		index.setProperty("client-only", true);
-		// TitanGraph graph =
-		// TitanFactory.open("titan-cassandra-es.properties");
-		TitanGraph graph = TitanFactory.open(config);
+		TitanGraph graph = initGraph();
 
-		Iterator<Vertex> vertices = graph.getVertices("name", "meeting")
+		Iterator<Vertex> vertices = graph.getVertices("name", "Mac Fang")
 				.iterator();
 
 		while (vertices.hasNext()) {
 			Vertex ver = vertices.next();
-			Iterator<Vertex> iter = ver.query().labels("join").vertices()
+			System.out.println(ver.getProperty("name") + " "
+					+ ver.getProperty("vid"));
+			Iterator<Vertex> iter = ver.query().labels("start").vertices()
 					.iterator();
 			while (iter.hasNext()) {
 				Vertex v = iter.next();

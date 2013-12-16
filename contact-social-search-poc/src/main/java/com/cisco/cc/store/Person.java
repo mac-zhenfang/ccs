@@ -9,12 +9,12 @@ import java.util.UUID;
  * @author zhefang
  * 
  */
-public class Contact {
+public class Person {
 
 	private String firstName;
 	private String lastName;
+	private String userName;
 	private String pictureUrl;
-	private String headline;
 	private String id = UUID.randomUUID().toString();
 	
 	public String getId() {
@@ -25,15 +25,6 @@ public class Contact {
 	public String getFirstName() {
 		return firstName;
 	}
-
-	public String getHeadline() {
-		return headline;
-	}
-
-	public void setHeadline(String headline) {
-		this.headline = headline;
-	}
-
 	public void setFirstName(String firstName) {
 		this.firstName = firstName;
 	}
@@ -57,7 +48,20 @@ public class Contact {
 	@Override
 	public String toString() {
 		return "firstName: " + firstName + " lastName: " + lastName
-				+ " headline: " + headline + " id: " + id;
+				+ " id: " + id;
 	}
-
+	
+	
+	public String getUserName() {
+		if(null == userName) {
+			return firstName + " " + lastName;
+		}
+		return userName;
+	}
+	//FIXME
+	public void setUserName(String userName) {
+		if(null == userName) {
+			this.userName = firstName + " " + lastName;
+		}
+	}
 }

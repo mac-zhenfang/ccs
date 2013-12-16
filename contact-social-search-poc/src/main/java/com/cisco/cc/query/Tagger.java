@@ -36,13 +36,13 @@ public class Tagger {
 	private static int numVB = 0;
 	private static int numNN = 0;
 	
-	private static String startP = null;
-	private static String endP = null;
-	private static String relation = null;
+	public static String startP = null;
+	public static String endP = null;
+	public static String relation = null;
 	
 	private static String prp = "Mac";
 	
-	private static Map graph = new HashMap<String, String>();
+	private static Map<String, String> graph = new HashMap<String, String>();
 	
 	public static void init(String queryStr, String prpStr) {
 		prp = prpStr;
@@ -231,7 +231,7 @@ public class Tagger {
 		System.out.println(t);
 	}
 	
-	public static Map getGraph() {
+	public static Map<String, String> getGraph() {
 		return graph;
 	}
 	

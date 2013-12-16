@@ -68,5 +68,10 @@
 			<scope>system</scope>
 			<systemPath>${basedir}/lib/stanford-postagger.jar</systemPath>
 		</dependency>
+		<dependency>
+			<groupId>com.thinkaurelius.titan</groupId>
+			<artifactId>titan-berkeleyje</artifactId>
+			<version>0.4.1</version>
+		</dependency>
 	</dependencies>
 </project>
