@@ -10,12 +10,12 @@ import java.util.List;
 
 import org.junit.Test;
 
-import com.cisco.cc.service.SocialSearchService;
-import com.cisco.cc.store.ActivityStreamStore;
-import com.cisco.cc.store.ActivityTypeStore;
-import com.cisco.cc.store.Person;
-import com.cisco.cc.store.PersonStore;
-import com.cisco.cc.store.SocialGraphStore;
+import com.cisco.css.service.SocialSearchServiceImpl;
+import com.cisco.css.store.ActivityStreamStore;
+import com.cisco.css.store.ActivityTypeStore;
+import com.cisco.css.store.Person;
+import com.cisco.css.store.PersonStore;
+import com.cisco.css.store.SocialGraphStore;
 
 /**
  * @author zhefang
@@ -60,7 +60,7 @@ public class TestStartUp {
 		BufferedReader stdin = new BufferedReader(new InputStreamReader(
 				System.in));
 		System.out.print("Enter a query string:");
-		SocialSearchService service = SocialSearchService.getService();
+		SocialSearchServiceImpl service = SocialSearchServiceImpl.getService();
 		while (true) {
 			String queryStr = stdin.readLine();
 			System.out.println(queryStr);

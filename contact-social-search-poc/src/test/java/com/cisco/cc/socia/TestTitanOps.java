@@ -15,8 +15,8 @@ import org.apache.commons.configuration.BaseConfiguration;
 import org.apache.commons.configuration.Configuration;
 import org.junit.Test;
 
-import com.cisco.cc.store.Person;
-import com.cisco.cc.store.PersonStore;
+import com.cisco.css.store.Person;
+import com.cisco.css.store.PersonStore;
 import com.thinkaurelius.titan.core.TitanFactory;
 import com.thinkaurelius.titan.core.TitanGraph;
 import com.thinkaurelius.titan.core.TitanKey;
