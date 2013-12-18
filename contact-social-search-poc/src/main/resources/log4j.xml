@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE log4j:configuration PUBLIC "-//LOGGER" "log4j.dtd">
+
+<log4j:configuration xmlns:log4j="http://jakarta.apache.org/log4j/">
+
+	<!-- Appenders -->
+	<appender name="stdout" class="org.apache.log4j.ConsoleAppender">
+		<param name="Target" value="System.out" />
+		<layout class="org.apache.log4j.PatternLayout">
+			<param name="ConversionPattern"
+				value="%d %-5p [%t] (%C.%M:%L) %x - %m%n" />
+		</layout>
+	</appender>
+
+	<appender name="logfile" class="org.apache.log4j.DailyRollingFileAppender">
+		<param name="File" value="C:/logs/mdmp.log" />
+		<param name="Threshold" value="DEBUG" />
+		<param name="DatePattern" value="'.'yyyy-MM-dd" />
+		<param name="Append" value="true" />
+		<layout class="org.apache.log4j.PatternLayout">
+			<param name="ConversionPattern" value="%d [%t] %-5p- %m%n" />
+		</layout>
+	</appender>
+
+	<appender name="errorlogfile" class="org.apache.log4j.DailyRollingFileAppender">
+		<param name="File" value="C:/logs/mdmp.error.log" />
+		<param name="Threshold" value="DEBUG" />
+		<param name="DatePattern" value="'.'yyyy-MM-dd" />
+		<param name="Append" value="true" />
+		<layout class="org.apache.log4j.PatternLayout">
+			<param name="ConversionPattern" value="%d [%t] %-5p- %m%n" />
+		</layout>
+	</appender>
+
+	<appender name="auditlog" class="org.apache.log4j.DailyRollingFileAppender">
+		<param name="File" value="${catalina.base}/logs/css.log" />
+		<param name="Threshold" value="DEBUG" />
+		<param name="DatePattern" value="'.'yyyy-MM-dd" />
+		<param name="Append" value="true" />
+		<layout class="org.apache.log4j.PatternLayout">
+			<param name="ConversionPattern" value="%d [%t] %-5p- %m%n" />
+		</layout>
+	</appender>
+
+	<!-- 3rdparty Loggers -->
+	<logger name="org.springframework" additivity="false">
+		<level value="info" />
+		<appender-ref ref="stdout" />
+	</logger>
+
+	<!-- API logger -->
+	<logger name="com.cisco.css" additivity="false">
+		<level value="info" />
+		<appender-ref ref="stdout" />
+	</logger>
+
+	<logger name="com.cisco.css.CssException" additivity="false">
+		<level value="error" />
+		<appender-ref ref="errorlogfile" />
+	</logger>
+
+	<!-- Root Logger -->
+	<root>
+		<level value="WARN" />
+		<appender-ref ref="errorlogfile" />
+	</root>
+
+</log4j:configuration>

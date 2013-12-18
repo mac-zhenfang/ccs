@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html ng-app="sample">
+<head>
+<title>Bootstrap 101 Template</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<!-- Bootstrap -->
+<link href="css/bootstrap.css" rel="stylesheet" media="screen">
+
+<script src="js/lib/jquery-1.8.3.js"></script>
+<script src="js/lib/bootstrap.min.js"></script>
+<script src="js/lib/angular.js"></script>
+<script src="js/sample.js"></script>
+<script src="js/lib/ui-bootstrap-tpls-0.2.0.js"></script>
+<script src="js/lib/highcharts.js"></script>
+<script src="js/lib/exporting.js"></script>
+</head>
+${name}
+<body class="ng-cloak" ng-controller="sample">
+	<div>{{username}}</div>
+	<div>'status' : {{status}}</div>
+	<!-- <input ng-init="message='test'" ng-model="message">  -->
+	<button ng-click="callNotify(message);">NOTIFY</button>
+	<button ng-click="callSonar();">Sonar</button>
+	<ul>
+		<li ng-repeat="project in data">[{{$index + 1}}] : Project:
+			{{project.name}} , language: {{project.lang}}</li>
+	</ul>
+	<div>How many Projects : {{data.lenth}}</div>
+
+	<div ng-controller="TabsDemoCtrl">
+		<tabs> <pane heading="Static title">Static content</pane> <pane
+			ng-repeat="pane in panes" heading="{{pane.title}}"
+			active="pane.active">{{pane.content}}</pane> </tabs>
+		<div class="row-fluid">
+			<button class="btn" ng-click="panes[0].active = true">Select
+				second tab</button>
+			<button class="btn" ng-click="panes[1].active = true">Select
+				third tab</button>
+			<button class="btn" ng-click="addPane()">Add Pane into Tab</button>
+		</div>
+	</div>
+	<div id="container" ng-controller="report" ng-init="initReport()"></div>
+
+</body>
+</html>
