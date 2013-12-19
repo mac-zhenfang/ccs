@@ -54,7 +54,7 @@ public class Tagger {
 		graph.put("endP", endP);
 		graph.put("relation", relation);
 		
-		tagged = getTaggedStr(queryStr);
+		tagged = getTaggedStr(queryStr.toLowerCase());
 		System.out.println(tagged);
 		taggedA = tagged.split(" ");
 		len = taggedA.length;
@@ -132,7 +132,7 @@ public class Tagger {
 				i += skip;
 				continue;
 			}
-			if(isNN(taggedA[i]) || taggedA[i].endsWith("me_PRP") || taggedA[i].endsWith("I_PRP")) {	
+			if(isNN(taggedA[i]) || taggedA[i].endsWith("me_PRP") || taggedA[i].endsWith("I_PRP") || taggedA[i].endsWith("i_PRP")) {	
 				String nn = getWord(taggedA[i]);
 				
 				//replace 'me' with a real Name
@@ -141,7 +141,7 @@ public class Tagger {
 				}
 				
 				//replace 'me' with a real Name
-				if(taggedA[i].endsWith("I_PRP")) {
+				if(taggedA[i].endsWith("I_PRP") || taggedA[i].endsWith("i_PRP")) {
 					nn = prp;
 				}
 				
