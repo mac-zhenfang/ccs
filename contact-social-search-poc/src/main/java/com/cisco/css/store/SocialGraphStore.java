@@ -181,7 +181,75 @@ public class SocialGraphStore extends Store {
 			personsVertex.addEdge(activity.getVerb(), thingsVertex);
 		}
 	}
-	
+
+	private void addRelation(Map<String, Relation> map, Relation relation) {
+		if (!map.containsKey(relation.getPerson().getId())) {
+			map.put(relation.getPerson().getId(), relation);
+		} else {
+			Relation relationFroMap = map.get(relation.getPerson().getId());
+			Iterator<String> keys = relation.getThings().keySet().iterator();
+			while (keys.hasNext()) {
+				relationFroMap.addThing(relation.getThings().get(keys.next()));
+			}
+		}
+	}
+
+	public List<Relation> queryRelation(String personUuid) {
+		List<Relation> rtList = new ArrayList<Relation>();
+		// the key is the personId,
+		Map<String, Relation> retRelations = new HashMap<String, Relation>();
+		// personUuid == rootVid
+		Iterator<Vertex> vertices = graph.getVertices("vid", personUuid)
+				.iterator();
+		// should only have 1 since it is UUID
+		Vertex rootVertex = vertices.next();
+		// create the main relation from Root person to Things
+		Relation rootRelation = new Relation();
+		rootRelation.setPerson(PersonStore.getStore().getOne(personUuid));
+		String[] labels = ActivityTypeStore.getStore().getVerbs()
+				.toArray(new String[0]);
+		// find the Thing
+		Iterator<Vertex> thingIter = rootVertex.query().labels(labels)
+				.vertices().iterator();
+		while (thingIter.hasNext()) {
+			Vertex thingVertex = thingIter.next();
+			// put thing into relation
+			String thingId = thingVertex.getProperty("vid");
+			String name = thingVertex.getProperty("name");
+			String type = thingVertex.getProperty("type");
+			Thing thing = new Thing();
+			thing.setId(thingId);
+			thing.setThingDisplayName(name);
+			thing.setThingObjectType(type);
+			rootRelation.addThing(thing);
+
+			// Find any Edges In Direction.IN and find the Person
+			Iterator<Vertex> personsIter = thingVertex.query()
+					.direction(Direction.IN).labels(labels).vertices()
+					.iterator();
+			// iterate the person and bind to the above thing - unique
+			while (personsIter.hasNext()) {
+				Vertex otherPerson = personsIter.next();
+				String otherPersonId = otherPerson.getProperty("vid");
+				String otherName = otherPerson.getProperty("name");
+
+				if (!otherPersonId.equals(personUuid)) {
+					Relation otherRelation = new Relation();
+					// logger.info(otherName);
+					// logger.info(otherPersonId);
+					otherRelation.setPerson(PersonStore.getStore().getOne(
+							otherPersonId));
+					otherRelation.addThing(thing);
+					addRelation(retRelations, otherRelation);
+				}
+			}
+		}
+
+		addRelation(retRelations, rootRelation);
+		rtList.addAll(retRelations.values());
+		return rtList;
+	}
+
 	public List<Person> query(List<ActivityType> types,
 			Person rootVertexPerson, Set<String> personIds) {
 		long start = System.currentTimeMillis();

@@ -49,6 +49,12 @@ public class PersonStore extends Store {
 					new TypeReference<List<Person>>() {
 					});
 			me = mapper.readValue(readFromFile("data/me"), Person.class);
+			// FIXME need to add me into themap
+			if (!personMap.containsKey(me.getId())) {
+				List<Person> meList = new ArrayList();
+				meList.add(me);
+				personMap.put(me.getId(), meList);
+			}
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
@@ -73,9 +79,9 @@ public class PersonStore extends Store {
 				}
 				lst.add(person);
 				personMap.put(key, lst);
-			} 
+			}
 			socialPersons = new ArrayList<Person>();
-			
+
 			socialPersons.addAll(Arrays.asList(persons));
 			initFullList();
 			addMeIn("Mac", "Fang");
@@ -144,6 +150,14 @@ public class PersonStore extends Store {
 		}
 		return rtList;
 
+	}
+
+	public Person getOne(String key) {
+		List<Person> rtList = personMap.get(key);
+		if (null != rtList && !rtList.isEmpty()) {
+			return rtList.get(0);
+		}
+		return null;
 	}
 
 	public Map<String, List<Person>> getPersons() {

@@ -17,6 +17,7 @@ import com.cisco.css.store.ActivityType;
 import com.cisco.css.store.ActivityTypeStore;
 import com.cisco.css.store.Person;
 import com.cisco.css.store.PersonStore;
+import com.cisco.css.store.Relation;
 import com.cisco.css.store.SocialGraphStore;
 
 /**
@@ -42,7 +43,7 @@ public class SocialSearchServiceImpl implements SocialSearchService {
 		return this.queryPersons(queryStr);
 	}
 
-
+	
 	@Override
 	public List<Person> getRelatedPersons(String uuid) {
 		List<Person> person = PersonStore.getStore().get(uuid);
@@ -108,6 +109,12 @@ public class SocialSearchServiceImpl implements SocialSearchService {
 		// Th
 
 		return relatedPersons;
+	}
+
+
+	@Override
+	public List<Relation> getRelations(String personId) {
+		return SocialGraphStore.getStore().queryRelation(personId);
 	}
 
 

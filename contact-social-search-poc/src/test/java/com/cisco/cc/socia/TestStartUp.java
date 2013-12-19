@@ -31,7 +31,7 @@ public class TestStartUp {
 		ActivityTypeStore.getStore().init();
 
 		ActivityStreamStore.getStore().init();
-		
+
 		SocialGraphStore.getStore().prepareData();
 	}
 
@@ -42,13 +42,12 @@ public class TestStartUp {
 		ActivityTypeStore.getStore().prepareData();
 
 		ActivityStreamStore.getStore().prepareData();
-		
+
 		SocialGraphStore.getStore().prepareData();
 
 	}
-
-	public static void main(String[] args) throws IOException {
-		
+	@Test
+	public void testQueryRelation() throws IOException {
 		PersonStore.getStore().init();
 
 		ActivityTypeStore.getStore().init();
@@ -57,6 +56,19 @@ public class TestStartUp {
 
 		SocialGraphStore.getStore().init();
 		
+		System.out.println(SocialGraphStore.getStore().queryRelation("744133ea-78e3-43ab-a173-e4ccdd77374e"));
+		
+	}
+	public static void main(String[] args) throws IOException {
+
+		PersonStore.getStore().init();
+
+		ActivityTypeStore.getStore().init();
+
+		ActivityStreamStore.getStore().init();
+
+		SocialGraphStore.getStore().init();
+
 		BufferedReader stdin = new BufferedReader(new InputStreamReader(
 				System.in));
 		System.out.print("Enter a query string:");
@@ -66,5 +78,6 @@ public class TestStartUp {
 			System.out.println(queryStr);
 			List<Person> persons = service.queryPersons(queryStr);
 			System.out.println(persons);
-		}	}
+		}
+	}
 }

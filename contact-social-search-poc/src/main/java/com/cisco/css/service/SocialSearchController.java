@@ -16,6 +16,7 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 import com.cisco.css.store.Person;
+import com.cisco.css.store.Relation;
 
 /**
  * @author zhefang
@@ -38,7 +39,7 @@ public class SocialSearchController {
 	
 	@RequestMapping(value = "/relations/{id}", method = RequestMethod.GET)
 	public @ResponseBody
-	List<Person> getRelatedContact(@PathVariable String id) throws IOException {
-		return socialSearchService.getRelatedPersons(id);
+	List<Relation> getRelatedContact(@PathVariable String id) throws IOException {
+		return socialSearchService.getRelations(id);
 	}
 }

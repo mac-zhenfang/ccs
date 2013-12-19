@@ -22,7 +22,10 @@ public class Thing {
 	public String getId() {
 		return id;
 	}
-
+	
+	public void setId(String id){
+		this.id = id;
+	}
 
 	public String getThingDisplayName() {
 		return targetDisplayName;
@@ -37,4 +40,5 @@ public class Thing {
 	private String id = UUID.randomUUID().toString();
 	
 	private String targetDisplayName;
+	
 }

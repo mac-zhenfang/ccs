@@ -17,6 +17,6 @@
 	},
 	{
 		"objectName": "discussion",
-		"verbs": ["init", "comment"]	
+		"verbs": ["init", "comment"]
 	}
 ]
