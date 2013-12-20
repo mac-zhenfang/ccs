@@ -9,7 +9,7 @@ public interface SocialSearchService {
 	
 	public List<Person> query(String queryStr);
 	
-	public List<Person> getRelatedPersons(String whom);
+	public List<Person> getPersons(String whom);
 	
 	public Person getPerson(String uuid);
 	

@@ -45,12 +45,17 @@ public class SocialSearchServiceImpl implements SocialSearchService {
 
 	
 	@Override
-	public List<Person> getRelatedPersons(String uuid) {
-		List<Person> person = PersonStore.getStore().get(uuid);
-		logger.info(uuid, person);
-		List<Person> relatedPersons = SocialGraphStore.getStore().query(ActivityTypeStore.getStore().getFullActivityTypes(),
-				PersonStore.getStore().get(uuid).get(0), PersonStore.getStore().getPersons().keySet());
-		return relatedPersons;
+	public List<Person> getPersons(String userName) {
+		List<Person> rtList = new ArrayList<Person> ();
+		List<Person> persons = PersonStore.getStore().getFullPersons();
+		Map<String, Person> similarPersons = new HashMap<String, Person>();
+		for (Person person : persons) {
+			if (person.getUserName().indexOf(userName) >= 0) {// FIXME
+				similarPersons.put(person.getId(), person);
+			}
+		}
+		rtList.addAll(similarPersons.values());
+		return rtList;
 	}
 
 
