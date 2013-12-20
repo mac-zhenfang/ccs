@@ -25,7 +25,7 @@ import com.cisco.css.store.SocialGraphStore;
 public class TestStartUp {
 
 	@Test
-	public void testCreateGraph() {
+	public void testCreateGraphLocal() {
 
 		PersonStore.getStore().init();
 
@@ -35,7 +35,17 @@ public class TestStartUp {
 
 		SocialGraphStore.getStore().prepareData();
 	}
-	
+	@Test
+	public void testCreateGraphRemote() {
+
+		PersonStore.getStore().init();
+
+		ActivityTypeStore.getStore().init();
+
+		ActivityStreamStore.getStore().init();
+
+		SocialGraphStore.getStore().prepareData();
+	}
 	@Test
 	public void testListAllRelations(){
 		PersonStore.getStore().init();

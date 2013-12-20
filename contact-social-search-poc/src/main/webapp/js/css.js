@@ -57,12 +57,17 @@ var RelationCtrl = function($scope, $location, $window) {
 		$.getJSON(callUri, {
 			param : "test"
 		}, function(data) {
-			console.log(JSON.stringify(data));
+			//console.log(JSON.stringify(data));
 			if (data.length > 0) {
-				var html = "<div class ='span2'> User Name : "
-						+ data[0].userName + "</div><div><img src="
-						+ data[0].pictureUrl + "></img>"
-						+ "<div class='span2'>ID : " + data[0].id + "</div>";
+				var html = "";
+				$.each(data, function(idx, item) {
+
+					html += "<div class='span12'><div class='span2'> User Name : "
+							+ item.userName + "</div><div class='span2'><img src="
+							+ item.pictureUrl + "></img></div>"
+							+ "<div class='span4'>ID : " + item.id + "</div></div>";
+					
+				});
 				console.log(html);
 				document.getElementById("pie").innerHTML = html;
 			} else {
@@ -96,9 +101,9 @@ var RelationCtrl = function($scope, $location, $window) {
 				// console.log("idx_"+idx);
 				node["name"] = item.person.userName;
 				if (ids != null) {
-					//console.log(ids.length);
-					for (var k=0;k<ids.length; k++) {
-						//console.log(ids[k]);
+					// console.log(ids.length);
+					for (var k = 0; k < ids.length; k++) {
+						// console.log(ids[k]);
 						var id = ids[k];
 						if (id == item.person.id) {
 							node["group"] = 4;
@@ -106,7 +111,7 @@ var RelationCtrl = function($scope, $location, $window) {
 							node["group"] = 3;
 						}
 					}
-				}else {
+				} else {
 					node["group"] = 3;
 				}
 
@@ -131,7 +136,7 @@ var RelationCtrl = function($scope, $location, $window) {
 						if (linkIdx != nodeTarget) {
 							link["source"] = linkIdx;
 							link["target"] = nodeTarget;
-							link["value"] = 1;
+							link["value"] = 5;
 							// console.log(link);
 							graph["links"][graph["links"].length] = link;
 						}
@@ -141,7 +146,7 @@ var RelationCtrl = function($scope, $location, $window) {
 						if (linkIdx != nodeTarget) {
 							link["source"] = thingMap[thingId];
 							link["target"] = nodeTarget;
-							link["value"] = 1;
+							link["value"] = 5;
 							// console.log(link);
 							graph["links"][graph["links"].length] = link;
 						}
@@ -163,7 +168,7 @@ var RelationCtrl = function($scope, $location, $window) {
 					});
 
 			var node = svg.selectAll(".node").data(graph.nodes).enter().append(
-					"circle").attr("class", "node").attr("r", 5).style("fill",
+					"circle").attr("class", "node").attr("r", 10).style("fill",
 					function(d) {
 						return color(d.group);
 					}).call(force.drag);
@@ -196,7 +201,7 @@ var RelationCtrl = function($scope, $location, $window) {
 
 		var callUri = relationUri + id;
 		console.info(callUri);
-		$scope.internalFindRelation(callUri, [id]);
+		$scope.internalFindRelation(callUri, [ id ]);
 	};
 };
 

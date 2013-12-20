@@ -84,44 +84,43 @@ public class SocialGraphStore extends Store {
 		if (isTitanInit.get()) {
 			return;
 		}
-		// BaseConfiguration config = new BaseConfiguration();
-		// Configuration storage = config
-		// .subset(GraphDatabaseConfiguration.STORAGE_NAMESPACE);
-		// storage.setProperty(GraphDatabaseConfiguration.STORAGE_BACKEND_KEY,
-		// "cassandra");
-		// storage.setProperty(GraphDatabaseConfiguration.HOSTNAME_KEY,
-		// "10.224.194.174");
-		//
-		// Configuration index = storage.subset(
-		// GraphDatabaseConfiguration.INDEX_NAMESPACE).subset(INDEX_NAME);
-		// index.setProperty(GraphDatabaseConfiguration.INDEX_BACKEND_KEY,
-		// "elasticsearch");
-		// index.setProperty(GraphDatabaseConfiguration.HOSTNAME_KEY,
-		// "10.224.194.171");
-		// index.setProperty("local-mode", false);
-		// index.setProperty("client-only", true);
-		// // TitanGraph graph =
-		// // TitanFactory.open("titan-cassandra-es.properties");
-		String directory = "c:\\a";
-		TitanGraph graph = null;
-		BaseConfiguration config = new BaseConfiguration();
-		Configuration storage = config
-				.subset(GraphDatabaseConfiguration.STORAGE_NAMESPACE);
-		// configuring local backend
-		storage.setProperty(GraphDatabaseConfiguration.STORAGE_BACKEND_KEY,
-				"local");
-		storage.setProperty(GraphDatabaseConfiguration.STORAGE_DIRECTORY_KEY,
-				directory);
-		// configuring elastic search index
-		Configuration index = storage.subset(
-				GraphDatabaseConfiguration.INDEX_NAMESPACE).subset(INDEX_NAME);
-		index.setProperty(INDEX_BACKEND_KEY, "elasticsearch");
-		index.setProperty("local-mode", true);
-		index.setProperty("client-only", false);
-		index.setProperty(STORAGE_DIRECTORY_KEY, directory + File.separator
-				+ "es");
-		graph = TitanFactory.open(config);
-		this.graph = graph;
+		 BaseConfiguration config = new BaseConfiguration();
+		 Configuration storage = config
+		 .subset(GraphDatabaseConfiguration.STORAGE_NAMESPACE);
+		 storage.setProperty(GraphDatabaseConfiguration.STORAGE_BACKEND_KEY,
+		 "cassandra");
+		 storage.setProperty(GraphDatabaseConfiguration.HOSTNAME_KEY,
+		 "10.224.194.174");
+		
+		 Configuration index = storage.subset(
+		 GraphDatabaseConfiguration.INDEX_NAMESPACE).subset(INDEX_NAME);
+		 index.setProperty(GraphDatabaseConfiguration.INDEX_BACKEND_KEY,
+		 "elasticsearch");
+		 index.setProperty(GraphDatabaseConfiguration.HOSTNAME_KEY,
+		 "10.224.194.171");
+		 index.setProperty("local-mode", false);
+		 index.setProperty("client-only", true);
+		 // TitanGraph graph =
+		 // TitanFactory.open("titan-cassandra-es.properties");
+//		String directory = "c:\\a";
+//		TitanGraph graph = null;
+//		BaseConfiguration config = new BaseConfiguration();
+//		Configuration storage = config
+//				.subset(GraphDatabaseConfiguration.STORAGE_NAMESPACE);
+//		// configuring local backend
+//		storage.setProperty(GraphDatabaseConfiguration.STORAGE_BACKEND_KEY,
+//				"local");
+//		storage.setProperty(GraphDatabaseConfiguration.STORAGE_DIRECTORY_KEY,
+//				directory);
+//		// configuring elastic search index
+//		Configuration index = storage.subset(
+//				GraphDatabaseConfiguration.INDEX_NAMESPACE).subset(INDEX_NAME);
+//		index.setProperty(INDEX_BACKEND_KEY, "elasticsearch");
+//		index.setProperty("local-mode", true);
+//		index.setProperty("client-only", false);
+//		index.setProperty(STORAGE_DIRECTORY_KEY, directory + File.separator
+//				+ "es");
+		this.graph = TitanFactory.open(config);
 		isTitanInit.set(true);
 	}
 
