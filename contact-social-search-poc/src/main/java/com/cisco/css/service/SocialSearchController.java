@@ -42,6 +42,19 @@ public class SocialSearchController {
 	List<Relation> getRelatedContact(@PathVariable String id) throws IOException {
 		return socialSearchService.getRelations(id);
 	}
+	
+	
+	@RequestMapping(value = "/relations/from/{fromId}/to/{toId}", method = RequestMethod.GET)
+	public @ResponseBody
+	List<Relation> getRelatedContact(@PathVariable String fromId, @PathVariable String toId) throws IOException {
+		return socialSearchService.getRelations(fromId, toId);
+	}
+	
+	@RequestMapping(value = "/relations", method = RequestMethod.GET)
+	public @ResponseBody
+	List<Relation> getRelatedContact() throws IOException {
+		return socialSearchService.getAllRelations();
+	}
 	@RequestMapping(value = "/persons/{userName}", method = RequestMethod.GET)
 	public @ResponseBody
 	List<Person> getPersons(@PathVariable String userName) throws IOException {

@@ -10,6 +10,7 @@ var queryUri = queryUri.substring(0, queryUri.lastIndexOf("/")) + "/v1/query/";
 var personUri = window.location.toString();
 var personUri = personUri.substring(0, personUri.lastIndexOf("/"))
 		+ "/v1/persons/";
+
 // declare UserService
 
 var RelationCtrl = function($scope, $location, $window) {
@@ -34,23 +35,43 @@ var RelationCtrl = function($scope, $location, $window) {
 			document.getElementById("pie").innerHTML = html;
 		});
 	};
+	$scope.findAllRelations = function() {
+		var callUri = relationUri;
+		$scope.internalFindRelation(callUri, null);
+	};
+
+	$scope.findRelation2 = function(from, to) {
+		var callUri = relationUri + "from/" + from + "/to/" + to;
+		$scope.internalFindRelation(callUri, [ from, to ]);
+	};
+
 	$scope.findRelatedPerson = function(queryStr) {
-		var callUri = queryUri + queryStr;
+
+		var callUri = queryUri;
+		if (null == queryStr || queryStr == "" || typeof queryStr == undefined) {
+
+		} else {
+			callUri = queryUri + queryStr;
+		}
 
 		$.getJSON(callUri, {
 			param : "test"
 		}, function(data) {
 			console.log(JSON.stringify(data));
-			var html = "<div class ='span2'> User Name : " + data[0].userName
-					+ "</div><div><img src=" + data[0].pictureUrl + "></img>"
-					+ "<div class='span2'>ID : " + data[0].id + "</div>";
-			console.log(html);
-			document.getElementById("pie").innerHTML = html;
+			if (data.length > 0) {
+				var html = "<div class ='span2'> User Name : "
+						+ data[0].userName + "</div><div><img src="
+						+ data[0].pictureUrl + "></img>"
+						+ "<div class='span2'>ID : " + data[0].id + "</div>";
+				console.log(html);
+				document.getElementById("pie").innerHTML = html;
+			} else {
+				document.getElementById("pie").innerHTML = "no such person";
+			}
 		});
 	};
-	$scope.findRelation = function(id) {
-		var callUri = relationUri + id;
-		console.info(callUri);
+
+	$scope.internalFindRelation = function(callUri, ids) {
 		var width = 1024, height = 968;
 
 		var color = d3.scale.category20();
@@ -73,10 +94,19 @@ var RelationCtrl = function($scope, $location, $window) {
 			$.each(data, function(idx, item) {
 				var node = {};
 				// console.log("idx_"+idx);
-				node["name"] = item.person.userName + "_" + nodeIdx;
-				if (id == item.person.id) {
-					node["group"] = 4;
-				} else {
+				node["name"] = item.person.userName;
+				if (ids != null) {
+					//console.log(ids.length);
+					for (var k=0;k<ids.length; k++) {
+						//console.log(ids[k]);
+						var id = ids[k];
+						if (id == item.person.id) {
+							node["group"] = 4;
+						} else {
+							node["group"] = 3;
+						}
+					}
+				}else {
 					node["group"] = 3;
 				}
 
@@ -93,7 +123,7 @@ var RelationCtrl = function($scope, $location, $window) {
 							|| typeof thingMap[thingId] == undefined) {
 						var thingNode = {};
 						thingNode["name"] = thing.thingDisplayName + "_"
-								+ thing.id + "_" + nodeIdx;
+								+ thing.id;
 						thingNode["group"] = 2;
 						graph["nodes"].push(thingNode);
 						thingMap[thingId] = linkIdx;
@@ -162,7 +192,12 @@ var RelationCtrl = function($scope, $location, $window) {
 
 		});
 	};
+	$scope.findRelation = function(id) {
 
+		var callUri = relationUri + id;
+		console.info(callUri);
+		$scope.internalFindRelation(callUri, [id]);
+	};
 };
 
 Css.controller("RelationCtrl", RelationCtrl);

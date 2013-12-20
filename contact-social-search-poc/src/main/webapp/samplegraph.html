@@ -30,14 +30,43 @@
 </script>
 </head>
 <body>
-	<form novalidate ng-controller='RelationCtrl'
-		class="navbar-form">
-		<input class="span4" type="text" ng-model="id"   placeholder="744133ea-78e3-43ab-a173-e4ccdd77374e">
-		<button type="submit" class="btn" ng-click="findRelation(id)" >Find Relation</button>
-		<input class="span4" type="text" ng-model="userName"  placeholder="Vagou">
-		<button type="submit" class="btn" ng-click="findPerson(userName)">Find  contacts</button>
-		<input class="span4" type="text" ng-model="queryStr" placeholder="Vagou who I always have meeting with"></input>
-		<button type="submit" class="btn" ng-click="findRelatedPerson(queryStr)">Find Related contacts</button>
+	<form novalidate ng-controller='RelationCtrl' class="navbar-form">
+		<div>You can input "Vagou" and Click 'Find Contacts', you can find persons who is simiar with 'Vagou' like "Vagourish, Vagou 2"</div>
+		<div>You can also input "Vagou who I have meeting" to find only 1 Vagou back</div>
+		<div>
+			<input class="span2" type="text" ng-model="userName"
+				placeholder="Vagou">
+			<button type="submit" class="btn" ng-click="findPerson(userName)">Find
+				contacts</button>
+			<input class="span4" type="text" ng-model="queryStr"
+				placeholder="Vagou who I always have meeting with"></input>
+			<button type="submit" class="btn"
+				ng-click="findRelatedPerson(queryStr)">Find Related
+				contacts</button>
+		</div>
+		<div>Click the "Find All Relation" will return you the entire graph of the events happen in system</div>
+		<div>Input "744133ea-78e3-43ab-a173-e4ccdd77374e" in "Find Relation" box, and click "Find Relation", you will get any persons who have actions with you before</div>
+		
+		<div>
+			<button type="submit" class="btn" ng-click="findAllRelations()">Find
+				All Relation</button>
+			<input class="span4" type="text" ng-model="id"
+				placeholder="id of a person">
+			<button type="submit" class="btn" ng-click="findRelation(id)">Find
+				Relation</button>
+		</div>
+		<div>Input "744133ea-78e3-43ab-a173-e4ccdd77374e" in "From" box and input "8b593839-a30b-447c-8cd1-8dd413584d14" in "to" box, you will find the relation between the 2 persons</div>
+		
+		<div>
+			<input class="span4" type="text" ng-model="from"
+				placeholder="from"> <input
+				class="span4" type="text" ng-model="to"
+				placeholder="to">
+			<button type="submit" class="btn" ng-click="findRelation2(from,to)">Find
+				Relation Between 2 persons</button>
+		</div>
+
+
 	</form>
 	<div id="pie"></div>
 </body>

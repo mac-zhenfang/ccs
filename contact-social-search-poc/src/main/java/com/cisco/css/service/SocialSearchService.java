@@ -14,4 +14,8 @@ public interface SocialSearchService {
 	public Person getPerson(String uuid);
 	
 	public List<Relation> getRelations(String personId);
+	
+	public List<Relation> getRelations(String fromId, String toId);
+	
+	public List<Relation> getAllRelations ();
 }

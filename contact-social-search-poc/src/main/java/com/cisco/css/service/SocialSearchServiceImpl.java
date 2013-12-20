@@ -115,11 +115,24 @@ public class SocialSearchServiceImpl implements SocialSearchService {
 
 		return relatedPersons;
 	}
-
+	
 
 	@Override
 	public List<Relation> getRelations(String personId) {
-		return SocialGraphStore.getStore().queryRelation(personId);
+		return SocialGraphStore.getStore().queryRelation(personId, null);
+	}
+
+
+	@Override
+	public List<Relation> getAllRelations() {
+		return SocialGraphStore.getStore().queryAllRelations();
+	}
+
+
+	@Override
+	public List<Relation> getRelations(String fromId, String toId) {
+		
+		return  SocialGraphStore.getStore().queryRelation(fromId, toId);
 	}
 
 
