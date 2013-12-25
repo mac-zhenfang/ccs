@@ -64,10 +64,9 @@ public class SocialGraphStore extends Store {
 			personsList.add(entry.getValue());
 		}
 		List<Activity> activities = new ArrayList<Activity>();
-		for (Entry<String, Activity> entry : ActivityStreamStore.getStore()
-				.getActivityMap().entrySet()) {
-			activities.add(entry.getValue());
-		}
+
+		activities.addAll(ActivityStreamStore.getStore().getActivityMap()
+				.values());
 
 		initEdges(initPersonVertex(personsList, graph),
 				initThingVertex(thingss, graph), activities);
@@ -85,44 +84,43 @@ public class SocialGraphStore extends Store {
 		if (isTitanInit.get()) {
 			return;
 		}
-		// BaseConfiguration config = new BaseConfiguration();
-		// Configuration storage = config
-		// .subset(GraphDatabaseConfiguration.STORAGE_NAMESPACE);
-		// storage.setProperty(GraphDatabaseConfiguration.STORAGE_BACKEND_KEY,
-		// "cassandra");
-		// storage.setProperty(GraphDatabaseConfiguration.HOSTNAME_KEY,
-		// "10.224.194.174");
-		//
-		// Configuration index = storage.subset(
-		// GraphDatabaseConfiguration.INDEX_NAMESPACE).subset(INDEX_NAME);
-		// index.setProperty(GraphDatabaseConfiguration.INDEX_BACKEND_KEY,
-		// "elasticsearch");
-		// index.setProperty(GraphDatabaseConfiguration.HOSTNAME_KEY,
-		// "10.224.194.171");
-		// index.setProperty("local-mode", false);
-		// index.setProperty("client-only", true);
-		// // TitanGraph graph =
-		// // TitanFactory.open("titan-cassandra-es.properties");
-		String directory = "c:\\a";
-		TitanGraph graph = null;
-		BaseConfiguration config = new BaseConfiguration();
-		Configuration storage = config
-				.subset(GraphDatabaseConfiguration.STORAGE_NAMESPACE);
-		// configuring local backend
-		storage.setProperty(GraphDatabaseConfiguration.STORAGE_BACKEND_KEY,
-				"local");
-		storage.setProperty(GraphDatabaseConfiguration.STORAGE_DIRECTORY_KEY,
-				directory);
-		// configuring elastic search index
-		Configuration index = storage.subset(
-				GraphDatabaseConfiguration.INDEX_NAMESPACE).subset(INDEX_NAME);
-		index.setProperty(INDEX_BACKEND_KEY, "elasticsearch");
-		index.setProperty("local-mode", true);
-		index.setProperty("client-only", false);
-		index.setProperty(STORAGE_DIRECTORY_KEY, directory + File.separator
-				+ "es");
-		graph = TitanFactory.open(config);
-		this.graph = graph;
+		 BaseConfiguration config = new BaseConfiguration();
+		 Configuration storage = config
+		 .subset(GraphDatabaseConfiguration.STORAGE_NAMESPACE);
+		 storage.setProperty(GraphDatabaseConfiguration.STORAGE_BACKEND_KEY,
+		 "cassandra");
+		 storage.setProperty(GraphDatabaseConfiguration.HOSTNAME_KEY,
+		 "10.224.194.174");
+		
+		 Configuration index = storage.subset(
+		 GraphDatabaseConfiguration.INDEX_NAMESPACE).subset(INDEX_NAME);
+		 index.setProperty(GraphDatabaseConfiguration.INDEX_BACKEND_KEY,
+		 "elasticsearch");
+		 index.setProperty(GraphDatabaseConfiguration.HOSTNAME_KEY,
+		 "10.224.194.171");
+		 index.setProperty("local-mode", false);
+		 index.setProperty("client-only", true);
+		 // TitanGraph graph =
+		 // TitanFactory.open("titan-cassandra-es.properties");
+//		String directory = "c:\\a";
+//		TitanGraph graph = null;
+//		BaseConfiguration config = new BaseConfiguration();
+//		Configuration storage = config
+//				.subset(GraphDatabaseConfiguration.STORAGE_NAMESPACE);
+//		// configuring local backend
+//		storage.setProperty(GraphDatabaseConfiguration.STORAGE_BACKEND_KEY,
+//				"local");
+//		storage.setProperty(GraphDatabaseConfiguration.STORAGE_DIRECTORY_KEY,
+//				directory);
+//		// configuring elastic search index
+//		Configuration index = storage.subset(
+//				GraphDatabaseConfiguration.INDEX_NAMESPACE).subset(INDEX_NAME);
+//		index.setProperty(INDEX_BACKEND_KEY, "elasticsearch");
+//		index.setProperty("local-mode", true);
+//		index.setProperty("client-only", false);
+//		index.setProperty(STORAGE_DIRECTORY_KEY, directory + File.separator
+//				+ "es");
+		this.graph = TitanFactory.open(config);
 		isTitanInit.set(true);
 	}
 
@@ -194,7 +192,41 @@ public class SocialGraphStore extends Store {
 		}
 	}
 
-	public List<Relation> queryRelation(String personUuid) {
+	public List<Relation> queryAllRelations() {
+		List<Relation> allRelations = new ArrayList<Relation>();
+		// the key is the personId,
+		Map<String, Relation> retRelations = new HashMap<String, Relation>();
+		Iterator<Vertex> vertices = graph.query().has("type", "person")
+				.vertices().iterator();
+		while (vertices.hasNext()) {
+			Vertex rootVertex = vertices.next();
+			String personUuid = rootVertex.getProperty("vid");
+			Relation rootRelation = new Relation();
+			rootRelation.setPerson(PersonStore.getStore().getOne(personUuid));
+			String[] labels = ActivityTypeStore.getStore().getVerbs()
+					.toArray(new String[0]);
+			// find the Thing
+			Iterator<Vertex> thingIter = rootVertex.query().labels(labels)
+					.vertices().iterator();
+			while (thingIter.hasNext()) {
+				Vertex thingVertex = thingIter.next();
+				// put thing into relation
+				String thingId = thingVertex.getProperty("vid");
+				String name = thingVertex.getProperty("name");
+				String type = thingVertex.getProperty("type");
+				Thing thing = new Thing();
+				thing.setId(thingId);
+				thing.setThingDisplayName(name);
+				thing.setThingObjectType(type);
+				rootRelation.addThing(thing);
+			}
+			addRelation(retRelations, rootRelation);
+		}
+		allRelations.addAll(retRelations.values());
+		return allRelations;
+	}
+
+	public List<Relation> queryRelation(String personUuid, String toId) {
 		List<Relation> rtList = new ArrayList<Relation>();
 		// the key is the personId,
 		Map<String, Relation> retRelations = new HashMap<String, Relation>();
@@ -202,50 +234,67 @@ public class SocialGraphStore extends Store {
 		Iterator<Vertex> vertices = graph.getVertices("vid", personUuid)
 				.iterator();
 		// should only have 1 since it is UUID
-		Vertex rootVertex = vertices.next();
-		// create the main relation from Root person to Things
-		Relation rootRelation = new Relation();
-		rootRelation.setPerson(PersonStore.getStore().getOne(personUuid));
-		String[] labels = ActivityTypeStore.getStore().getVerbs()
-				.toArray(new String[0]);
-		// find the Thing
-		Iterator<Vertex> thingIter = rootVertex.query().labels(labels)
-				.vertices().iterator();
-		while (thingIter.hasNext()) {
-			Vertex thingVertex = thingIter.next();
-			// put thing into relation
-			String thingId = thingVertex.getProperty("vid");
-			String name = thingVertex.getProperty("name");
-			String type = thingVertex.getProperty("type");
-			Thing thing = new Thing();
-			thing.setId(thingId);
-			thing.setThingDisplayName(name);
-			thing.setThingObjectType(type);
-			rootRelation.addThing(thing);
+		while (vertices.hasNext()) {
+			Vertex rootVertex = vertices.next();
+			// create the main relation from Root person to Things
+			Relation rootRelation = new Relation();
+			rootRelation.setPerson(PersonStore.getStore().getOne(personUuid));
+			String[] labels = ActivityTypeStore.getStore().getVerbs()
+					.toArray(new String[0]);
+			// find the Thing
+			Iterator<Vertex> thingIter = rootVertex.query().labels(labels)
+					.vertices().iterator();
+			while (thingIter.hasNext()) {
+				Vertex thingVertex = thingIter.next();
+				// put thing into relation
+				String thingId = thingVertex.getProperty("vid");
+				String name = thingVertex.getProperty("name");
+				String type = thingVertex.getProperty("type");
+				Thing thing = new Thing();
+				thing.setId(thingId);
+				thing.setThingDisplayName(name);
+				thing.setThingObjectType(type);
+				rootRelation.addThing(thing);
 
-			// Find any Edges In Direction.IN and find the Person
-			Iterator<Vertex> personsIter = thingVertex.query()
-					.direction(Direction.IN).labels(labels).vertices()
-					.iterator();
-			// iterate the person and bind to the above thing - unique
-			while (personsIter.hasNext()) {
-				Vertex otherPerson = personsIter.next();
-				String otherPersonId = otherPerson.getProperty("vid");
-				String otherName = otherPerson.getProperty("name");
+				// Find any Edges In Direction.IN and find the Person
+				Iterator<Vertex> personsIter = thingVertex.query()
+						.direction(Direction.IN).labels(labels).vertices()
+						.iterator();
+				// iterate the person and bind to the above thing - unique
+				while (personsIter.hasNext()) {
 
-				if (!otherPersonId.equals(personUuid)) {
-					Relation otherRelation = new Relation();
-					// logger.info(otherName);
-					// logger.info(otherPersonId);
-					otherRelation.setPerson(PersonStore.getStore().getOne(
-							otherPersonId));
-					otherRelation.addThing(thing);
-					addRelation(retRelations, otherRelation);
+					Vertex otherPerson = personsIter.next();
+					String otherPersonId = otherPerson.getProperty("vid");
+					String otherName = otherPerson.getProperty("name");
+					if (null != toId) {
+						if (otherPersonId.endsWith(toId)) {
+							Relation otherRelation = new Relation();
+							// logger.info(otherName);
+							// logger.info(otherPersonId);
+							otherRelation.setPerson(PersonStore.getStore()
+									.getOne(otherPersonId));
+							otherRelation.addThing(thing);
+							addRelation(retRelations, otherRelation);
+							break;
+						} else {
+							continue;
+						}
+					} else {
+						if (!otherPersonId.equals(personUuid)) {
+							Relation otherRelation = new Relation();
+							// logger.info(otherName);
+							// logger.info(otherPersonId);
+							otherRelation.setPerson(PersonStore.getStore()
+									.getOne(otherPersonId));
+							otherRelation.addThing(thing);
+							addRelation(retRelations, otherRelation);
+						}
+					}
 				}
 			}
+			addRelation(retRelations, rootRelation);
 		}
 
-		addRelation(retRelations, rootRelation);
 		rtList.addAll(retRelations.values());
 		return rtList;
 	}

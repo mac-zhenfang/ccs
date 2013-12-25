@@ -9,9 +9,13 @@ public interface SocialSearchService {
 	
 	public List<Person> query(String queryStr);
 	
-	public List<Person> getRelatedPersons(String whom);
+	public List<Person> getPersons(String whom);
 	
 	public Person getPerson(String uuid);
 	
 	public List<Relation> getRelations(String personId);
+	
+	public List<Relation> getRelations(String fromId, String toId);
+	
+	public List<Relation> getAllRelations ();
 }

@@ -45,12 +45,17 @@ public class SocialSearchServiceImpl implements SocialSearchService {
 
 	
 	@Override
-	public List<Person> getRelatedPersons(String uuid) {
-		List<Person> person = PersonStore.getStore().get(uuid);
-		logger.info(uuid, person);
-		List<Person> relatedPersons = SocialGraphStore.getStore().query(ActivityTypeStore.getStore().getFullActivityTypes(),
-				PersonStore.getStore().get(uuid).get(0), PersonStore.getStore().getPersons().keySet());
-		return relatedPersons;
+	public List<Person> getPersons(String userName) {
+		List<Person> rtList = new ArrayList<Person> ();
+		List<Person> persons = PersonStore.getStore().getFullPersons();
+		Map<String, Person> similarPersons = new HashMap<String, Person>();
+		for (Person person : persons) {
+			if (person.getUserName().indexOf(userName) >= 0) {// FIXME
+				similarPersons.put(person.getId(), person);
+			}
+		}
+		rtList.addAll(similarPersons.values());
+		return rtList;
 	}
 
 
@@ -110,11 +115,24 @@ public class SocialSearchServiceImpl implements SocialSearchService {
 
 		return relatedPersons;
 	}
-
+	
 
 	@Override
 	public List<Relation> getRelations(String personId) {
-		return SocialGraphStore.getStore().queryRelation(personId);
+		return SocialGraphStore.getStore().queryRelation(personId, null);
+	}
+
+
+	@Override
+	public List<Relation> getAllRelations() {
+		return SocialGraphStore.getStore().queryAllRelations();
+	}
+
+
+	@Override
+	public List<Relation> getRelations(String fromId, String toId) {
+		
+		return  SocialGraphStore.getStore().queryRelation(fromId, toId);
 	}
 
 

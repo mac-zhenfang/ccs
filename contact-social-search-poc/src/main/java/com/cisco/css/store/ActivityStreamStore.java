@@ -28,7 +28,7 @@ public class ActivityStreamStore extends Store {
 
 	private Map<String, Person> usedPersons = new HashMap<String, Person>();
 
-	private int countPerThing = 2;
+	private int countPerThing = 30;
 	private int thingCount = 10;
 	private AtomicBoolean isInsane = new AtomicBoolean(true);
 
@@ -78,42 +78,52 @@ public class ActivityStreamStore extends Store {
 						.getVerbs(objectName);
 				String mainVerb = verbsOfObjectType.get(0);
 				String mainKey = thing.getId() + mainVerb;
-				for (Person person : PersonStore.getStore().getSocialPersons()) {
-					for (String verb : verbsOfObjectType) {
+				// for (Person person :
+				// PersonStore.getStore().getSocialPersons()) {
+				// hard code to add me in
+				Person person;
+				if (i == 0) {
+					 person = PersonStore.getStore().getMe();
+				} else {
+					 person = getRandomPerson();
+				}
+				for (String verb : verbsOfObjectType) {
 
-						Activity activity = new Activity();
-						activity.setId(UUID.randomUUID().toString());
-						activity.setActorDisplayName(person.getFirstName()
-								+ " " + person.getLastName());
-						// FIXME person is a person for sure
-						activity.setActorObjectType("person");
-						activity.setActorId(person.getId());
-						// FIXME, should be all
-						activity.setActorDisplayName(person.getUserName());
-						activity.setThingId(thing.getId());
-						activity.setThingObjectType(thing.getThingObjectType());
-						activity.setThingDisplayName(thing
-								.getThingDisplayName());
-						activity.setTimestamp(System.currentTimeMillis());
-						activity.setVerb(verb);
-						// the mainKey means the start, init, for 1 thing
-						// instance,
-						// e.g meeting, only can start for once
-						if (!activityMap.containsKey(mainKey)
-								&& mainVerb.equals(verb)) {
-							activityMap.put(mainKey, activity);
+					Activity activity = new Activity();
+					activity.setId(UUID.randomUUID().toString());
+					activity.setActorDisplayName(person.getFirstName() + " "
+							+ person.getLastName());
+					// FIXME person is a person for sure
+					activity.setActorObjectType("person");
+					activity.setActorId(person.getId());
+					// FIXME, should be all
+					activity.setActorDisplayName(person.getUserName());
+					activity.setThingId(thing.getId());
+					activity.setThingObjectType(thing.getThingObjectType());
+					activity.setThingDisplayName(thing.getThingDisplayName());
+					activity.setTimestamp(System.currentTimeMillis());
+					activity.setVerb(verb);
+					// the mainKey means the start, init, for 1 thing
+					// instance,
+					// e.g meeting, only can start for once
+					// Person A might have duplicated event, like join
+					// meeting(meeting 2) 2 times
+					// It is duplication, but it is true might happen in reality
+					if (!activityMap.containsKey(mainKey)
+							&& mainVerb.equals(verb)) {
+						activityMap.put(mainKey, activity);
+						if (!usedPersons.containsKey(person.getId()))
+							usedPersons.put(person.getId(), person);
+					} else {
+						if (!verb.equals(mainVerb)) {
+							activityMap.put(thing.getId() + verb + j++,
+									activity);
 							if (!usedPersons.containsKey(person.getId()))
 								usedPersons.put(person.getId(), person);
-						} else {
-							if (!verb.equals(mainVerb)) {
-								activityMap.put(thing.getId() + verb + j++,
-										activity);
-								if (!usedPersons.containsKey(person.getId()))
-									usedPersons.put(person.getId(), person);
-							}
 						}
 					}
 				}
+				// }
 			} while (i++ < randomInt);
 		}
 		try {
@@ -165,6 +175,11 @@ public class ActivityStreamStore extends Store {
 		}
 
 		return list;
+	}
+
+	private Person getRandomPerson() {
+		List<Person> persons = PersonStore.getStore().getSocialPersons();
+		return persons.get(Utils.getRandomInt(persons.size() - 1));
 	}
 
 	public static void main(String[] args) {

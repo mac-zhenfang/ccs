@@ -15,6 +15,7 @@ import com.cisco.css.store.ActivityStreamStore;
 import com.cisco.css.store.ActivityTypeStore;
 import com.cisco.css.store.Person;
 import com.cisco.css.store.PersonStore;
+import com.cisco.css.store.Relation;
 import com.cisco.css.store.SocialGraphStore;
 
 /**
@@ -24,7 +25,18 @@ import com.cisco.css.store.SocialGraphStore;
 public class TestStartUp {
 
 	@Test
-	public void testStartup() {
+	public void testCreateGraphLocal() {
+
+		PersonStore.getStore().init();
+
+		ActivityTypeStore.getStore().init();
+
+		ActivityStreamStore.getStore().prepareData();
+
+		SocialGraphStore.getStore().prepareData();
+	}
+	@Test
+	public void testCreateGraphRemote() {
 
 		PersonStore.getStore().init();
 
@@ -33,6 +45,20 @@ public class TestStartUp {
 		ActivityStreamStore.getStore().init();
 
 		SocialGraphStore.getStore().prepareData();
+	}
+	@Test
+	public void testListAllRelations(){
+		PersonStore.getStore().init();
+
+		ActivityTypeStore.getStore().init();
+
+		ActivityStreamStore.getStore().init();
+
+		SocialGraphStore.getStore().init();
+		
+		List<Relation> relations = SocialGraphStore.getStore().queryAllRelations();
+		
+		System.out.println(relations.size());
 	}
 
 	@Test
@@ -56,7 +82,20 @@ public class TestStartUp {
 
 		SocialGraphStore.getStore().init();
 		
-		System.out.println(SocialGraphStore.getStore().queryRelation("744133ea-78e3-43ab-a173-e4ccdd77374e"));
+		System.out.println(SocialGraphStore.getStore().queryRelation("744133ea-78e3-43ab-a173-e4ccdd77374e", null));
+		
+	}
+	@Test
+	public void testQueryRelation2() throws IOException {
+		PersonStore.getStore().init();
+
+		ActivityTypeStore.getStore().init();
+
+		ActivityStreamStore.getStore().init();
+
+		SocialGraphStore.getStore().init();
+		
+		System.out.println(SocialGraphStore.getStore().queryRelation("744133ea-78e3-43ab-a173-e4ccdd77374e", "8b593839-a30b-447c-8cd1-8dd413584d14"));
 		
 	}
 	public static void main(String[] args) throws IOException {
