@@ -49,6 +49,10 @@ public class Tagger {
 		init(queryStr);
 	}
 	
+	/**
+	 * init all static paramters 
+	 * @param queryStr
+	 */
 	public static void init(String queryStr) {
 		graph.put("startP", startP);
 		graph.put("endP", endP);
@@ -94,9 +98,20 @@ public class Tagger {
 		return word.substring(0, word.indexOf("_"));
 	}
 	
+	/**
+	 * analysis the content String to split out those key words.  including vb and nn
+	 * then generate a result startP/endP/relation
+	 * 
+	 */
 	public static void analysis() {
 		int vbCount = 0;
 		int nnCount = 0;
+		
+		/*whether a sentence start with a WP word*/
+		if(taggedA[0].endsWith("_WP")) {
+			firstNN = getWord(taggedA[0]);
+			nnCount++;
+		}
 		
 		for(int i = 0; i < len; i++) {
 			if(isVB(taggedA[i])) {	
@@ -108,12 +123,21 @@ public class Tagger {
 					skip += 2;
 				}				
 				//have meetings (with)
-				if(i+1 < len && i+2 >= len && isNN(taggedA[i+1])) {
+				if(i+1 < len && i+2 >= len && (isNN(taggedA[i+1]) || isVB(taggedA[i+1]))) {
+					vb += " " + getWord(taggedA[i+1]);
+					skip += 1;
+				}
+		
+				//do like bean and milk/do have meeting
+				if(i+3 < len && skip == 0 && isVB(taggedA[i+1]) && isNN(taggedA[i+2]) && !taggedA[i+3].equals("and_CC") && !taggedA[i+3].equals("or_CC")) {
+					vb += " " + getWord(taggedA[i+1]) + " " + getWord(taggedA[i+2]);
+					skip += 2;
+				} else if(i+3 < len && isVB(taggedA[i+1]) && !isNN(taggedA[i+2]) && !isVB(taggedA[i+2]) && !taggedA[i+3].equals("and_CC") && !taggedA[i+3].equals("or_CC")) {
 					vb += " " + getWord(taggedA[i+1]);
 					skip += 1;
 				}
 				//like bean and milk
-				if(i+2 < len && isNN(taggedA[i+1]) && !taggedA[i+2].equals("and_CC") && !taggedA[i+2].equals("or_CC")) {
+				if(i+2 < len && skip == 0 && (isNN(taggedA[i+1]) || isVB(taggedA[i+1]))&& !taggedA[i+2].equals("and_CC") && !taggedA[i+2].equals("or_CC")) {
 					vb += " " + getWord(taggedA[i+1]);
 					skip += 1;
 				}
@@ -132,7 +156,10 @@ public class Tagger {
 				i += skip;
 				continue;
 			}
-			if(isNN(taggedA[i]) || taggedA[i].endsWith("me_PRP") || taggedA[i].endsWith("I_PRP") || taggedA[i].endsWith("i_PRP")) {	
+			if(isNN(taggedA[i]) 
+					|| taggedA[i].endsWith("me_PRP") 
+					|| taggedA[i].endsWith("I_PRP") 
+					|| taggedA[i].endsWith("i_PRP")) {	
 				String nn = getWord(taggedA[i]);
 				
 				//replace 'me' with a real Name
@@ -181,7 +208,13 @@ public class Tagger {
 			}
 		}
 		
-		relation = firstVB;
+		if(firstVB != null && firstVB.split(" ").length > 1) {
+			String [] s = firstVB.split(" ");
+			relation = s[s.length-1];
+		} else {
+			relation = firstVB;
+		}
+		
 		endP = firstNN;
 		startP = secondNN;
 	}
@@ -266,6 +299,25 @@ public class Tagger {
 		System.out.println("-----------------------------------------------------");
 		//----------------------------------------------------------------------------
 		sample = "dogs and pigs which hate or like pumpkin and bean ";		 
+		Tagger.init(sample, "Mac");
+		Tagger.analysis();
+		if(!Tagger.isSimple()) {
+			System.err.println("Your query is too complex to analysis");
+		}				
+		Tagger.printTarget();
+		System.out.println("-----------------------------------------------------");
+		//----------------------------------------------------------------------------
+		// Someone who i meet with between 2012 to 2013 
+		sample = "Vagou who I do meeting with";		 
+		Tagger.init(sample, "Mac");
+		Tagger.analysis();
+		if(!Tagger.isSimple()) {
+			System.err.println("Your query is too complex to analysis");
+		}				
+		Tagger.printTarget();
+		System.out.println("-----------------------------------------------------");
+		//----------------------------------------------------------------------------
+		sample = "Vagou who I do have meeting with";		 
 		Tagger.init(sample, "Mac");
 		Tagger.analysis();
 		if(!Tagger.isSimple()) {
