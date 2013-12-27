@@ -147,7 +147,7 @@ public class RelationMapper {
 				perfect = en.getKey();
 			}
 		}
-		System.out.println("similar: " + max);
+//		System.out.println("similar: " + max);
 		return perfect;
 	}
 
