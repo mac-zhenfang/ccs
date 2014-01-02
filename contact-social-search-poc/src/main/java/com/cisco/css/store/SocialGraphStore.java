@@ -149,7 +149,7 @@ public class SocialGraphStore extends Store {
 		index.setProperty(GraphDatabaseConfiguration.HOSTNAME_KEY,
 				"10.224.194.171");
 		index.setProperty("local-mode", false);
-		index.setProperty("client-only", true);
+		index.setProperty("client-only", true); 
 		// TitanGraph graph =
 		// TitanFactory.open("titan-cassandra-es.properties");
 		// String directory = "c:\\a";

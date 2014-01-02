@@ -72,7 +72,7 @@ public class SocialSearchServiceImpl implements SocialSearchService {
 		if(!Tagger.isSimple()) {
 			System.err.println("Your query is too complex to analysis");
 		}
-		return this.queryPersons(Tagger.startP, Tagger.relation, Tagger.endP);
+		return this.queryPersons(Tagger.startP, Tagger.relationMapped, Tagger.endP);
 	}
 
 	public List<Person> queryPersons(String subject, String relation, String endP) {
@@ -102,7 +102,7 @@ public class SocialSearchServiceImpl implements SocialSearchService {
 		List<Person> persons = PersonStore.getStore().getFullPersons();
 		Map<String, Person> similarPersons = new HashMap<String, Person>();
 		for (Person person : persons) {
-			if (person.getUserName().indexOf(endP) >= 0) {// FIXME
+			if (person.getUserName().toLowerCase().indexOf(endP.toLowerCase()) >= 0) {// FIXME
 				similarPersons.put(person.getId(), person);
 			}
 		}
