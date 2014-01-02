@@ -3,11 +3,9 @@
  */
 package com.cisco.css.store;
 
-import static com.thinkaurelius.titan.graphdb.configuration.GraphDatabaseConfiguration.INDEX_BACKEND_KEY;
-import static com.thinkaurelius.titan.graphdb.configuration.GraphDatabaseConfiguration.STORAGE_DIRECTORY_KEY;
-
-import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -26,8 +24,12 @@ import com.thinkaurelius.titan.core.TitanGraph;
 import com.thinkaurelius.titan.graphdb.configuration.GraphDatabaseConfiguration;
 import com.tinkerpop.blueprints.Direction;
 import com.tinkerpop.blueprints.Edge;
+import com.tinkerpop.blueprints.Graph;
 import com.tinkerpop.blueprints.Vertex;
 import com.tinkerpop.blueprints.util.ElementHelper;
+import com.tinkerpop.rexster.client.RexProException;
+import com.tinkerpop.rexster.client.RexsterClient;
+import com.tinkerpop.rexster.client.RexsterClientFactory;
 
 /**
  * @author zhefang
@@ -41,15 +43,54 @@ public class SocialGraphStore extends Store {
 
 	private static SocialGraphStore store = new SocialGraphStore();
 
-	private TitanGraph graph;
+	private Graph graph;
 
 	private AtomicBoolean isTitanInit = new AtomicBoolean();
+
+	RexsterClient client;
 
 	public static SocialGraphStore getStore() {
 		return store;
 	}
 
 	public void prepareData() {
+		BaseConfiguration config = new BaseConfiguration();
+		Configuration storage = config
+				.subset(GraphDatabaseConfiguration.STORAGE_NAMESPACE);
+		storage.setProperty(GraphDatabaseConfiguration.STORAGE_BACKEND_KEY,
+				"cassandra");
+		storage.setProperty(GraphDatabaseConfiguration.HOSTNAME_KEY,
+				"10.224.194.174");
+
+		Configuration index = storage.subset(
+				GraphDatabaseConfiguration.INDEX_NAMESPACE).subset(INDEX_NAME);
+		index.setProperty(GraphDatabaseConfiguration.INDEX_BACKEND_KEY,
+				"elasticsearch");
+		index.setProperty(GraphDatabaseConfiguration.HOSTNAME_KEY,
+				"10.224.194.171");
+		index.setProperty("local-mode", false);
+		index.setProperty("client-only", true);
+		// TitanGraph graph =
+		// TitanFactory.open("titan-cassandra-es.properties");
+		// String directory = "c:\\a";
+		// TitanGraph graph = null;
+		// BaseConfiguration config = new BaseConfiguration();
+		// Configuration storage = config
+		// .subset(GraphDatabaseConfiguration.STORAGE_NAMESPACE);
+		// // configuring local backend
+		// storage.setProperty(GraphDatabaseConfiguration.STORAGE_BACKEND_KEY,
+		// "local");
+		// storage.setProperty(GraphDatabaseConfiguration.STORAGE_DIRECTORY_KEY,
+		// directory);
+		// // configuring elastic search index
+		// Configuration index = storage.subset(
+		// GraphDatabaseConfiguration.INDEX_NAMESPACE).subset(INDEX_NAME);
+		// index.setProperty(INDEX_BACKEND_KEY, "elasticsearch");
+		// index.setProperty("local-mode", true);
+		// index.setProperty("client-only", false);
+		// index.setProperty(STORAGE_DIRECTORY_KEY, directory + File.separator
+		// + "es");
+		TitanGraph titanGraph = TitanFactory.open(config);
 		Map<String, Person> personss = ActivityStreamStore.getStore()
 				.getUsedPersons();
 
@@ -57,7 +98,7 @@ public class SocialGraphStore extends Store {
 
 		initTitan();
 
-		initTitanGraphTypes(graph);
+		initTitanGraphTypes(titanGraph);
 
 		List<Person> personsList = new ArrayList<Person>();
 		for (Entry<String, Person> entry : personss.entrySet()) {
@@ -68,15 +109,24 @@ public class SocialGraphStore extends Store {
 		activities.addAll(ActivityStreamStore.getStore().getActivityMap()
 				.values());
 
-		initEdges(initPersonVertex(personsList, graph),
-				initThingVertex(thingss, graph), activities);
+		initEdges(initPersonVertex(personsList, titanGraph),
+				initThingVertex(thingss, titanGraph), activities);
 
-		graph.commit();
+		titanGraph.commit();
 	}
 
 	public void init() {
 		initTitan();
+		initRexerClient();
 		isTitanInit.set(true);
+	}
+
+	public void initRexerClient() {
+		try {
+			client = RexsterClientFactory.open("10.224.194.174", 8184, "mac11");
+		} catch (Exception e) {
+			throw new RuntimeException(e);
+		}
 	}
 
 	// FIXME
@@ -84,42 +134,42 @@ public class SocialGraphStore extends Store {
 		if (isTitanInit.get()) {
 			return;
 		}
-		 BaseConfiguration config = new BaseConfiguration();
-		 Configuration storage = config
-		 .subset(GraphDatabaseConfiguration.STORAGE_NAMESPACE);
-		 storage.setProperty(GraphDatabaseConfiguration.STORAGE_BACKEND_KEY,
-		 "cassandra");
-		 storage.setProperty(GraphDatabaseConfiguration.HOSTNAME_KEY,
-		 "10.224.194.174");
-		
-		 Configuration index = storage.subset(
-		 GraphDatabaseConfiguration.INDEX_NAMESPACE).subset(INDEX_NAME);
-		 index.setProperty(GraphDatabaseConfiguration.INDEX_BACKEND_KEY,
-		 "elasticsearch");
-		 index.setProperty(GraphDatabaseConfiguration.HOSTNAME_KEY,
-		 "10.224.194.171");
-		 index.setProperty("local-mode", false);
-		 index.setProperty("client-only", true);
-		 // TitanGraph graph =
-		 // TitanFactory.open("titan-cassandra-es.properties");
-//		String directory = "c:\\a";
-//		TitanGraph graph = null;
-//		BaseConfiguration config = new BaseConfiguration();
-//		Configuration storage = config
-//				.subset(GraphDatabaseConfiguration.STORAGE_NAMESPACE);
-//		// configuring local backend
-//		storage.setProperty(GraphDatabaseConfiguration.STORAGE_BACKEND_KEY,
-//				"local");
-//		storage.setProperty(GraphDatabaseConfiguration.STORAGE_DIRECTORY_KEY,
-//				directory);
-//		// configuring elastic search index
-//		Configuration index = storage.subset(
-//				GraphDatabaseConfiguration.INDEX_NAMESPACE).subset(INDEX_NAME);
-//		index.setProperty(INDEX_BACKEND_KEY, "elasticsearch");
-//		index.setProperty("local-mode", true);
-//		index.setProperty("client-only", false);
-//		index.setProperty(STORAGE_DIRECTORY_KEY, directory + File.separator
-//				+ "es");
+		BaseConfiguration config = new BaseConfiguration();
+		Configuration storage = config
+				.subset(GraphDatabaseConfiguration.STORAGE_NAMESPACE);
+		storage.setProperty(GraphDatabaseConfiguration.STORAGE_BACKEND_KEY,
+				"cassandra");
+		storage.setProperty(GraphDatabaseConfiguration.HOSTNAME_KEY,
+				"10.224.194.174");
+
+		Configuration index = storage.subset(
+				GraphDatabaseConfiguration.INDEX_NAMESPACE).subset(INDEX_NAME);
+		index.setProperty(GraphDatabaseConfiguration.INDEX_BACKEND_KEY,
+				"elasticsearch");
+		index.setProperty(GraphDatabaseConfiguration.HOSTNAME_KEY,
+				"10.224.194.171");
+		index.setProperty("local-mode", false);
+		index.setProperty("client-only", true);
+		// TitanGraph graph =
+		// TitanFactory.open("titan-cassandra-es.properties");
+		// String directory = "c:\\a";
+		// TitanGraph graph = null;
+		// BaseConfiguration config = new BaseConfiguration();
+		// Configuration storage = config
+		// .subset(GraphDatabaseConfiguration.STORAGE_NAMESPACE);
+		// // configuring local backend
+		// storage.setProperty(GraphDatabaseConfiguration.STORAGE_BACKEND_KEY,
+		// "local");
+		// storage.setProperty(GraphDatabaseConfiguration.STORAGE_DIRECTORY_KEY,
+		// directory);
+		// // configuring elastic search index
+		// Configuration index = storage.subset(
+		// GraphDatabaseConfiguration.INDEX_NAMESPACE).subset(INDEX_NAME);
+		// index.setProperty(INDEX_BACKEND_KEY, "elasticsearch");
+		// index.setProperty("local-mode", true);
+		// index.setProperty("client-only", false);
+		// index.setProperty(STORAGE_DIRECTORY_KEY, directory + File.separator
+		// + "es");
 		this.graph = TitanFactory.open(config);
 		isTitanInit.set(true);
 	}
@@ -299,6 +349,63 @@ public class SocialGraphStore extends Store {
 		return rtList;
 	}
 
+	public List<Person> query2(List<ActivityType> types,
+			Person rootVertexPerson, Set<String> personIds) {
+		long start = System.currentTimeMillis();
+		List<Person> retPersons = new ArrayList<Person>();
+		List<String> verbsLst = new ArrayList<String>();
+		for (ActivityType type : types) {
+			verbsLst.addAll(Arrays.asList(type.getVerbs()));
+		}
+		String[] verbs = verbsLst.toArray(new String[0]);
+		StringBuffer verbStr = new StringBuffer();
+		int i = 0;
+		for (String verb : verbs) {
+			if (i != 0) {
+				verbStr.append(" ,");
+			}
+			verbStr.append("'").append(verb).append("'");
+
+			i++;
+		}
+		//System.out.println(verbStr.toString());
+		StringBuffer personIdsStrBuf = new StringBuffer();
+		i = 0;
+		for (String personId : personIds) {
+			if (i != 0) {
+				personIdsStrBuf.append(" ,");
+			}
+			personIdsStrBuf.append("'").append(personId).append("'");
+			i++;
+		}
+		try {
+			// List<Map<String, Object>> result = client
+			// .execute("g.V('vid','152df38d-9035-4adf-9f74-c5c6a950c760').out('start', 'join').in('start', 'join').has('vid', T.in, ['744133ea-78e3-43ab-a173-e4ccdd77374e','cc44d35a-d21f-4e58-9f6c-c923f83da641']).dedup()");
+			String queryStr = "g.V('vid','"
+					+ rootVertexPerson.getId() + "').out('start', 'join').in("
+					+ verbStr.toString() + ").has('vid', T.in, ["
+					+ personIdsStrBuf.toString()
+					+ "]).dedup()";
+			logger.info(queryStr);
+			List<Map<String, Object>> result = client.execute(queryStr);
+			for (Map<String, Object> map : result) {
+				Map<String, String> innerMap = (HashMap<String, String>) map
+						.get("_properties");
+				String personVid = innerMap.get("vid");
+				List<Person> persons = PersonStore.getStore().get(personVid);
+				retPersons.addAll(persons);
+			}
+		} catch (RexProException e) {
+			throw new RuntimeException(e);
+		} catch (IOException e) {
+			throw new RuntimeException(e);
+		}
+		logger.info(" cost: " + (System.currentTimeMillis() - start));
+
+		return retPersons;
+	}
+
+	
 	public List<Person> query(List<ActivityType> types,
 			Person rootVertexPerson, Set<String> personIds) {
 		long start = System.currentTimeMillis();

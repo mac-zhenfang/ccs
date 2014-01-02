@@ -106,7 +106,7 @@ public class SocialSearchServiceImpl implements SocialSearchService {
 				similarPersons.put(person.getId(), person);
 			}
 		}
-		List<Person> relatedPersons = SocialGraphStore.getStore().query(types,
+		List<Person> relatedPersons = SocialGraphStore.getStore().query2(types,
 				mePerson, similarPersons.keySet());
 		// check if related person is in the similar persons
 		// You looked for 'Mike Zhang'
