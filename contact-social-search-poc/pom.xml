@@ -9,7 +9,11 @@
 		<spring.version>3.1.2.RELEASE</spring.version>
 	</properties>
 	<dependencies>
-
+		<dependency>
+			<groupId>com.google.caliper</groupId>
+			<artifactId>caliper</artifactId>
+			<version>1.0-beta-1</version>
+		</dependency>
 		<dependency>
 			<groupId>com.tinkerpop.rexster</groupId>
 			<artifactId>rexster-protocol</artifactId>
@@ -156,6 +160,12 @@
 			<version>2.5</version>
 		</dependency>
 		<!-- Servlet Done -->
+		<dependency>
+			<groupId>junitperf</groupId>
+			<artifactId>junitperf</artifactId>
+			<version>1.8</version>
+			<scope>test</scope>
+		</dependency>
 	</dependencies>
 	<build>
 		<defaultGoal>install</defaultGoal>

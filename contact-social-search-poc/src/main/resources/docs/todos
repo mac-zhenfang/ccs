@@ -1,19 +1,25 @@
 MileStone 1:
 	1. Simply can be used to search contacts:
 		Vagou who I always have meeting with
+		<- Done ->
 	2. Have a UI to show the relation and search result
+		<- Done ->
 	3. Find a better way to Titan query - Performance
-	4. Have a simliar words list, for example: user might input:
+		<- In progress ->
+	4. Have a simliar words list, for example: user might input: ()
 		Mac who I always have meeting with
 		Mac who I always meet with
 		Vagou I "never" have meeting with
 	   'have meeting with' and 'meet with' should have the same meaning
+	   <- In progress ->
 	5. Sort directory quick search results based on 
 		1) who I "follow"
 		2) my "frequently calls" relationship in the USG. 
 		For instance, based on the relationship of Lawrence "frequently calls" Darrin, 
 		when I type "D" in my directory, 
 		Darrin's name would be shown first ahead of many other names that start with D.
+		<- In progress ->
+		
 MileStone 2: 
 	
 	1. Recommend other expertise if the Called is not available. 

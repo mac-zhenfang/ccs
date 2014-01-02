@@ -1,0 +1,26 @@
+Scheduling / Pre-Meeting:
+1. Filter/sort the list of names in the People Directory results as I start typing characters into the Search box 
+based on whom I "follow." Optional value-add from historical/derived relationship: Whom I "frequently meet with."
+2. Recommend Alternate Host for the meeting being organized based on higher value relationships between particular 
+	Invitees and the Organizer - for instance, the Organizer's "Manager," the Organizer's "Teammate," or the 
+	Organizer's "Alternate Host for Meetings."[Depends more on Activity History than Relationship Status] 
+	After the Meeting Organizer enters 2 Invitee names, recommend other potential Invitees 
+	(similar to the way that GMail recommends people to include in the To: field) based on whom else was included 
+	as invitees in previous meetings that had the first 2 Invitees. Can such activity history be represented in the USG, 
+	or should it be separately persisted in an Activity Stream service [I would think it's the latter]?
+
+Chat
+Pre-Chat:
+Filter/sort the list of names in the People Directory results as I start typing characters into the Search box 
+based on whom I "follow." Optional value-add from historical/derived relationship: Whom I "frequently chat with."
+
+Phone
+Pre-Call:
+Sort directory quick search results based on 1) who I "follow" and 2) my "frequently calls" relationship in the USG. 
+For instance, based on the relationship of Lawrence "frequently calls" Darrin, when I type "D" in my directory, 
+Darrin's name would be shown first ahead of many other names that start with D.
+
+In-Call: 
+Recommend other expertise if the Called is not available. Recommended a user assigned to the same task as the Caller 
+and the Called, and 2) if both Caller and Called follow that person.
+
