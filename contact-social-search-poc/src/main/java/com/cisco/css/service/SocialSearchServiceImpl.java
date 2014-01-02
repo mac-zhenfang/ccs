@@ -75,11 +75,16 @@ public class SocialSearchServiceImpl implements SocialSearchService {
 		return this.queryPersons(Tagger.startP, Tagger.relationMapped, Tagger.endP);
 	}
 
-	public List<Person> queryPersons(String subject, String relation, String endP) {
+	public List<Person> queryPersons(String subject, List<String> relation, String endP) {
 
 		// parse the relation to string, suppose relation is "have meeting",
 		// hard coded
-		String relat = subject + " " + relation;
+		if(relation.size() > 1) {
+			//TODO
+			throw new RuntimeException("not support yet");
+		}
+		String relationStr = relation.get(0);
+		String relat = subject + " " + relationStr;
 		String[] relas = relat.split(" ");
 		//
 		List<ActivityType> types = new ArrayList<ActivityType>();
