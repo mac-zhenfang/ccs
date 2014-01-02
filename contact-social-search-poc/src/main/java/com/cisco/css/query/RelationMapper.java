@@ -100,7 +100,7 @@ public class RelationMapper {
 			String key = en.getKey();
 			//equals original or stem word make success
 			if(key.equals(word)) {
-				mapperW.put(en.getValue(), 1d);
+				mapperW.put(en.getValue(), 2d);
 				return mapperW;
 			}
 //			Double dis1 = StringDistance.LevenshteinDistancePercent(word, key);
@@ -120,14 +120,14 @@ public class RelationMapper {
 	private static Double maxSimilar(String key, String word, List<String> stems) {
 		Double max = StringDistance.LevenshteinDistancePercent(word, key);
 
+		//DOTO: some improvement should be implemented 
 		for(String str : stems) {
 			if(key.contains(str)) {
-				max = Math.max(max * 2, 0.7);
+				max = Math.max(max * 2, 0.6);
 			}
 			Double dis = StringDistance.LevenshteinDistancePercent(str, key);
 			max = Math.max(dis, max);
-		}
-		
+		}		
 		return max;
 	}
 
@@ -144,7 +144,7 @@ public class RelationMapper {
 		Double max = Collections.max(mapperW.values());
 	
 		for(Map.Entry<String, Double> en : mapperW.entrySet()) {
-			if((max - en.getValue()) < 0.2) {
+			if((max - en.getValue()) < 0.2 || en.getValue() >= 1) {
 				result.add(en.getKey());
 			}
 		}
