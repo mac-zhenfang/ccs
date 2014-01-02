@@ -1,6 +1,7 @@
 package com.cisco.css.query;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import edu.stanford.nlp.tagger.maxent.MaxentTagger;
@@ -39,11 +40,11 @@ public class Tagger {
 	public static String startP = null;
 	public static String endP = null;
 	public static String relation = null;
-	public static String relationMapped = null;
+	public static List<String> relationMapped = null;
 	
 	private static String prp = "Mac";
 	
-	private static Map<String, String> graph = new HashMap<String, String>();
+	private static Map<String, Object> graph = new HashMap<String, Object>();
 	private static RelationMapper rm;
 	public static void init(String queryStr, String prpStr) {
 		prp = prpStr;
@@ -248,7 +249,7 @@ public class Tagger {
 			relation = firstVB;
 		}
 		
-		relationMapped = rm.mappingRelation(relation);
+		relationMapped = rm.mappingRelation(StopWords.stop(relation));
 		endP = firstNN;
 		startP = secondNN;
 	}
@@ -294,19 +295,22 @@ public class Tagger {
 	public static void printTarget() {
 		String t = "startP: " + startP;
 		t += "\nrelation: " + relation;
-		t += "\nrelationMapped: " + relationMapped;
+		t += "\nrelationMapped: ";
+		for(String s : relationMapped) {
+			t += s + "\n";
+		}
 		t += "\nendP: " + endP;
 		System.out.println(t);
 	}
 	
-	public static Map<String, String> getGraph() {
+	public static Map<String, Object> getGraph() {
 		return graph;
 	}
 	
 	public static void main(String[] args) {
 		// http://www.computing.dcu.ie/~acahill/tagset.html the tagger 
 
-		String sample = "Tom who  call peter";		 
+		String sample = "Tom who have meeting call with peter";		 
 		Tagger.init(sample, "Mac");
 		Tagger.analysis();
 		if(!Tagger.isSimple()) {
@@ -343,7 +347,7 @@ public class Tagger {
 		Tagger.printTarget();
 		System.out.println("-----------------------------------------------------");
 		//----------------------------------------------------------------------------
-		sample = "Vagou  I  have call";		 
+		sample = "Vagou  I  have conference call";		 
 		Tagger.init(sample, "Mac");
 		Tagger.analysis();
 		if(!Tagger.isSimple()) {

@@ -3,6 +3,7 @@ package com.cisco.css.query;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -78,7 +79,7 @@ public class RelationMapper {
 	 * @param word
 	 * @return
 	 */
-	public String mappingRelation(String word) {
+	public List<String> mappingRelation(String word) {
 		String[] b = word.split(" ");
 		List<String> stems = new ArrayList<String>();
 		for(String s : b) {
@@ -138,17 +139,17 @@ public class RelationMapper {
 		return map;
 	}
 
-	private static String getMax(Map<String, Double> mapperW) {
-		String perfect = null;
-		Double max = 0d;
+	private static List<String> getMax(Map<String, Double> mapperW) {
+		List<String> result = new ArrayList<String>();
+		Double max = Collections.max(mapperW.values());
+	
 		for(Map.Entry<String, Double> en : mapperW.entrySet()) {
-			if(en.getValue() > max) {
-				max = en.getValue();
-				perfect = en.getKey();
+			if((max - en.getValue()) < 0.2) {
+				result.add(en.getKey());
 			}
 		}
-//		System.out.println("similar: " + max);
-		return perfect;
+		
+		return result;
 	}
 
 	/**
