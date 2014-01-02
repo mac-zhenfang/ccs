@@ -39,22 +39,30 @@ public class Tagger {
 	public static String startP = null;
 	public static String endP = null;
 	public static String relation = null;
+	public static String relationMapped = null;
 	
 	private static String prp = "Mac";
 	
 	private static Map<String, String> graph = new HashMap<String, String>();
-	
+	private static RelationMapper rm;
 	public static void init(String queryStr, String prpStr) {
 		prp = prpStr;
 		init(queryStr);
 	}
 	
+	/**
+	 * init all static paramters 
+	 * @param queryStr
+	 */
 	public static void init(String queryStr) {
+		if(rm == null) {
+			rm = RelationMapper.getInstance();
+		}
 		graph.put("startP", startP);
 		graph.put("endP", endP);
-		graph.put("relation", relation);
+		graph.put("relation", relationMapped);
 		
-		tagged = getTaggedStr(queryStr);
+		tagged = getTaggedStr(queryStr.toLowerCase());
 		System.out.println(tagged);
 		taggedA = tagged.split(" ");
 		len = taggedA.length;
@@ -78,25 +86,36 @@ public class Tagger {
 		thrdNNindex = 0;
 	}
 	
-	public static String getTaggedStr(String src) {
+	private static String getTaggedStr(String src) {
 		return tagger.tagString(src);
 	}
 
-	public static boolean isVB(String word) {
+	private static boolean isVB(String word) {
 		return word.indexOf("_VB") > 0;
 	}
 	
-	public static boolean isNN(String word) {
+	private static boolean isNN(String word) {
 		return word.indexOf("_NN") > 0;
 	}
 	
-	public static String getWord(String word) {
+	private static String getWord(String word) {
 		return word.substring(0, word.indexOf("_"));
 	}
 	
+	/**
+	 * analysis the content String to split out those key words.  including vb and nn
+	 * then generate a result startP/endP/relation
+	 * 
+	 */
 	public static void analysis() {
 		int vbCount = 0;
 		int nnCount = 0;
+		
+		/*whether a sentence start with a WP word*/
+		if(taggedA[0].endsWith("_WP")) {
+			firstNN = getWord(taggedA[0]);
+			nnCount++;
+		}
 		
 		for(int i = 0; i < len; i++) {
 			if(isVB(taggedA[i])) {	
@@ -108,14 +127,37 @@ public class Tagger {
 					skip += 2;
 				}				
 				//have meetings (with)
-				if(i+1 < len && i+2 >= len && isNN(taggedA[i+1])) {
+				if(i+1 < len && i+2 >= len && (isNN(taggedA[i+1]) || isVB(taggedA[i+1]))) {
 					vb += " " + getWord(taggedA[i+1]);
 					skip += 1;
 				}
-				//like bean and milk
-				if(i+2 < len && isNN(taggedA[i+1]) && !taggedA[i+2].equals("and_CC") && !taggedA[i+2].equals("or_CC")) {
-					vb += " " + getWord(taggedA[i+1]);
-					skip += 1;
+		
+				//do like bean and milk/do have meeting
+//				if(i+3 < len && skip == 0 && isVB(taggedA[i+1]) && isNN(taggedA[i+2]) && !taggedA[i+3].equals("and_CC") && !taggedA[i+3].equals("or_CC")) {
+//					vb += " " + getWord(taggedA[i+1]) + " " + getWord(taggedA[i+2]);
+//					skip += 2;
+//				} else if(i+3 < len && isVB(taggedA[i+1]) && !isNN(taggedA[i+2]) && !isVB(taggedA[i+2]) && !taggedA[i+3].equals("and_CC") && !taggedA[i+3].equals("or_CC")) {
+//					vb += " " + getWord(taggedA[i+1]);
+//					skip += 1;
+//				}
+//				//like bean and milk
+//				if(i+2 < len && skip == 0 && (isNN(taggedA[i+1]) || isVB(taggedA[i+1]))&& !taggedA[i+2].equals("and_CC") && !taggedA[i+2].equals("or_CC")) {
+//					vb += " " + getWord(taggedA[i+1]);
+//					skip += 1;
+//				}
+				
+				int dis = disOfNextNN(i);
+				if(dis > 0 && dis < 3) {
+					int disi = 0;
+					while(disi < dis) {
+						vb += " " + getWord(taggedA[i + disi + 1]);
+						disi++;
+					}	
+					skip = dis;
+					if(i + dis + 1 < len && isNN(taggedA[i + dis + 1])) {
+						vb += " " + getWord(taggedA[i + dis + 1]);
+						skip++;
+					}			
 				}
 				
 				if(vbCount == 0) {
@@ -132,7 +174,10 @@ public class Tagger {
 				i += skip;
 				continue;
 			}
-			if(isNN(taggedA[i]) || taggedA[i].endsWith("me_PRP") || taggedA[i].endsWith("I_PRP")) {	
+			if(isNN(taggedA[i]) 
+					|| taggedA[i].endsWith("me_PRP") 
+					|| taggedA[i].endsWith("I_PRP") 
+					|| taggedA[i].endsWith("i_PRP")) {	
 				String nn = getWord(taggedA[i]);
 				
 				//replace 'me' with a real Name
@@ -141,7 +186,7 @@ public class Tagger {
 				}
 				
 				//replace 'me' with a real Name
-				if(taggedA[i].endsWith("I_PRP")) {
+				if(taggedA[i].endsWith("I_PRP") || taggedA[i].endsWith("i_PRP")) {
 					nn = prp;
 				}
 				
@@ -171,7 +216,21 @@ public class Tagger {
 		generate();
 	}
 	
-	public static void generate() {
+	private static int disOfNextNN(int i) {
+		i++;
+		int dis = 0;
+		while(i < len) {
+			dis++;
+			if(isNN(taggedA[i])) {
+				return dis;
+			}
+			i++;			
+		}
+		//if no NN 
+		return 0;
+	}
+
+	private static void generate() {
 		if(numNN == 1) {
 			
 			if(firstVB != null && firstVB.split(" ").length == 2) {
@@ -181,24 +240,32 @@ public class Tagger {
 			}
 		}
 		
-		relation = firstVB;
+		if(firstVB != null && secondNN == null && firstVB.split(" ").length > 1) {
+			String [] s = firstVB.split(" ");
+			secondNN = s[s.length-1];
+			relation = firstVB.substring(0, firstVB.length() - secondNN.length() - 1);
+		} else {
+			relation = firstVB;
+		}
+		
+		relationMapped = rm.mappingRelation(relation);
 		endP = firstNN;
 		startP = secondNN;
 	}
 	
-	public static String getFirstVB() {
+	private static String getFirstVB() {
 		return firstVB;
 	}
 	
-	public static String getFirstNN() {
+	private static String getFirstNN() {
 		return firstNN;
 	}
 	
-	public static String getSecondVB() {
+	private static String getSecondVB() {
 		return secondVB;
 	}
 	
-	public static String getSecondNN() {
+	private static String getSecondNN() {
 		return secondNN;
 	}
 	
@@ -209,7 +276,7 @@ public class Tagger {
 		return true;
 	}
 	
-	public static String getTarget() {
+	private static String getTarget() {
 		return firstNN;
 	}
 	
@@ -227,6 +294,7 @@ public class Tagger {
 	public static void printTarget() {
 		String t = "startP: " + startP;
 		t += "\nrelation: " + relation;
+		t += "\nrelationMapped: " + relationMapped;
 		t += "\nendP: " + endP;
 		System.out.println(t);
 	}
@@ -238,16 +306,17 @@ public class Tagger {
 	public static void main(String[] args) {
 		// http://www.computing.dcu.ie/~acahill/tagset.html the tagger 
 
-		String sample = "Tom who have meeting with me";		 
+		String sample = "Tom who  call peter";		 
 		Tagger.init(sample, "Mac");
 		Tagger.analysis();
 		if(!Tagger.isSimple()) {
 			System.err.println("Your query is too complex to analysis");
 		}				
 		Tagger.printTarget();
-		System.out.println("-----------------------------------------------------");
-	//----------------------------------------------------------------------------
-		sample = "phtone that I like";		 
+		System.out.println("-----------------------------------------------------");	
+		//----------------------------------------------------------------------------
+		// Someone who i meet with between 2012 to 2013 
+		sample = "Vagou who I have content share with";		 
 		Tagger.init(sample, "Mac");
 		Tagger.analysis();
 		if(!Tagger.isSimple()) {
@@ -256,7 +325,7 @@ public class Tagger {
 		Tagger.printTarget();
 		System.out.println("-----------------------------------------------------");
 		//----------------------------------------------------------------------------
-		sample = "dogs and pigs which hate pumpkin and bean ";		 
+		sample = "Vagou who I do have meeting";		 
 		Tagger.init(sample, "Mac");
 		Tagger.analysis();
 		if(!Tagger.isSimple()) {
@@ -265,7 +334,16 @@ public class Tagger {
 		Tagger.printTarget();
 		System.out.println("-----------------------------------------------------");
 		//----------------------------------------------------------------------------
-		sample = "dogs and pigs which hate or like pumpkin and bean ";		 
+		sample = "Vagou who I  have content share";		 
+		Tagger.init(sample, "Mac");
+		Tagger.analysis();
+		if(!Tagger.isSimple()) {
+			System.err.println("Your query is too complex to analysis");
+		}				
+		Tagger.printTarget();
+		System.out.println("-----------------------------------------------------");
+		//----------------------------------------------------------------------------
+		sample = "Vagou  I  have call";		 
 		Tagger.init(sample, "Mac");
 		Tagger.analysis();
 		if(!Tagger.isSimple()) {
