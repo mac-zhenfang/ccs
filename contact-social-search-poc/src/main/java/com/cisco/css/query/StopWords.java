@@ -1,8 +1,11 @@
 package com.cisco.css.query;
 
+import java.util.HashSet;
+import java.util.Set;
+
 public class StopWords {
 
-	private static String stopWords = "a,able,about,above,abroad,according,accordingly,across," +
+	private static String stopWord = "a,able,about,above,abroad,according,accordingly,across," +
 			"actually,adj,after,afterwards,again,against,ago,ahead,ain't,all,allow,allows,almost," +
 			"alone,along,alongside,already,also,although,always,am,amid,amidst,among,amongst,an,and," +
 			"apart,appear,are,aren't,around,as,a's,aside,at,be,became,become,been,before,beforehand," +
@@ -35,16 +38,25 @@ public class StopWords {
 			"whichever,while,whilst,whither,who,who'd,whoever,whole,who'll,whom,whomever,who's,whose,why,will,with,within,without," +
 			"wonder,won't,would,wouldn't,x,y,yet,you,you'd,you'll,your,you're,yours,yourself,yourselves,you've,z";
 	
+	private static Set<String> stopWords = new HashSet<String>();
+	
+	static {
+		String[] stops = stopWord.split(",");
+		for(String w : stops) {
+			stopWords.add(w);
+		}
+	}
 	
 	
 	public static String stop(String src) {
 		String[] wl = src.split(" ");
+		StringBuilder bl = new StringBuilder();
 		for(String word : wl) {
-			if(stopWords.contains(word)) {
-				src.replace(word, "");
+			if(!stopWords.contains(word)) {
+				bl.append(word + " ");
 			}
 		}
-		return src;
+		return bl.toString();
 	}
 	
 	/**

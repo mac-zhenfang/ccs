@@ -338,7 +338,7 @@ public class Tagger {
 		Tagger.printTarget();
 		System.out.println("-----------------------------------------------------");
 		//----------------------------------------------------------------------------
-		sample = "Vagou who I  have content share";		 
+		sample = "Vagou who I  have a conference call with";		 
 		Tagger.init(sample, "Mac");
 		Tagger.analysis();
 		if(!Tagger.isSimple()) {
@@ -347,7 +347,7 @@ public class Tagger {
 		Tagger.printTarget();
 		System.out.println("-----------------------------------------------------");
 		//----------------------------------------------------------------------------
-		sample = "Vagou  I  have conference call";		 
+		sample = "Vagou who I  have conference call with";		 
 		Tagger.init(sample, "Mac");
 		Tagger.analysis();
 		if(!Tagger.isSimple()) {
