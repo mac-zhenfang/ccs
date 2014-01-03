@@ -5,12 +5,17 @@ MileStone 1:
 	2. Have a UI to show the relation and search result
 		<- Done ->
 	3. Find a better way to Titan query - Performance
-		<- In progress ->
+		<- Done ->
 	4. Have a simliar words list, for example: user might input: ()
 		Mac who I always have meeting with
 		Mac who I always meet with
 		Vagou I "never" have meeting with
 	   'have meeting with' and 'meet with' should have the same meaning
+	   <- Done ->
+	5. Add timestamp and timestamp alike terms, like: 
+		Mac who I always have meeting with -> always
+		Mac who I have meeting with between 2013-1-4 to 2013-1-5
+		Mac who I have meeting with at 2013-1-4
 	   <- In progress ->
 	5. Sort directory quick search results based on 
 		1) who I "follow"
@@ -19,7 +24,6 @@ MileStone 1:
 		when I type "D" in my directory, 
 		Darrin's name would be shown first ahead of many other names that start with D.
 		<- In progress ->
-		
 MileStone 2: 
 	
 	1. Recommend other expertise if the Called is not available. 
