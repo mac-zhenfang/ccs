@@ -117,11 +117,11 @@ public class TestStartUp {
 		System.out.println(rootVertexPerson);
 		List<Person> persons = PersonStore.getStore().getFullPersons();
 		Map<String, Person> similarPersons = new HashMap<String, Person>();
-//		for (Person person : persons) {
-//			if (person.getUserName().indexOf("Vagou") >= 0) {// FIXME
-//				similarPersons.put(person.getId(), person);
-//			}
-//		}
+		// for (Person person : persons) {
+		// if (person.getUserName().indexOf("Vagou") >= 0) {// FIXME
+		// similarPersons.put(person.getId(), person);
+		// }
+		// }
 		// SocialGraphStore.getStore().query2(types, rootVertexPerson,
 		// similarPersons.keySet());
 		for (int i = 0; i < 100; i++) {
@@ -221,27 +221,24 @@ public class TestStartUp {
 	}
 
 	public static void main(String[] args) throws IOException {
-		// Test testCase = new StringUtilTest("testPerformanceQuery2");
-		// TestSuite suite = new TestSuite();
-		// PersonStore.getStore().init();
-		//
-		// ActivityTypeStore.getStore().init();
-		//
-		// ActivityStreamStore.getStore().init();
-		//
-		// SocialGraphStore.getStore().init();
-		//
-		// BufferedReader stdin = new BufferedReader(new InputStreamReader(
-		// System.in));
-		// System.out.print("Enter a query string:");
-		// SocialSearchServiceImpl service =
-		// SocialSearchServiceImpl.getService();
-		// while (true) {
-		// String queryStr = stdin.readLine();
-		// System.out.println(queryStr);
-		// List<Person> persons = service.queryPersons(queryStr);
-		// System.out.println(persons);
-		// }
+		PersonStore.getStore().init();
+
+		ActivityTypeStore.getStore().init();
+
+		ActivityStreamStore.getStore().init();
+
+		SocialGraphStore.getStore().init();
+
+		BufferedReader stdin = new BufferedReader(new InputStreamReader(
+				System.in));
+		System.out.print("Enter a query string:");
+		SocialSearchServiceImpl service = SocialSearchServiceImpl.getService();
+		while (true) {
+			String queryStr = stdin.readLine();
+			System.out.println(queryStr);
+			List<Person> persons = service.queryPersons(queryStr);
+			System.out.println(persons);
+		}
 	}
 
 }
