@@ -74,7 +74,7 @@
 			<artifactId>edu.stanford.nlp</artifactId>
 			<version>3.3</version>
 			<scope>system</scope>
-			<systemPath>${basedir}/lib/stanford-postagger.jar</systemPath>
+			<systemPath>${basedir}/src/main/webapp/WEB-INF/lib/stanford-postagger.jar</systemPath>
 		</dependency>
 		<dependency>
 			<groupId>com.thinkaurelius.titan</groupId>
