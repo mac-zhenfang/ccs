@@ -1,8 +1,16 @@
 package com.cisco.css.query;
 
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Properties;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import edu.stanford.nlp.tagger.maxent.MaxentTagger;
 
@@ -19,6 +27,7 @@ public class Tagger {
 	private static MaxentTagger tagger = new MaxentTagger("taggers/english-caseless-left3words-distsim.tagger");
 	private static String tagged;
 	private static String[] taggedA;
+	private static String[] untaggedA;
 	private static int len;
 	private static String firstVB = null;
 	private static int firstVBindex = 0;
@@ -41,35 +50,73 @@ public class Tagger {
 	public static String endP = null;
 	public static String relation = null;
 	public static List<String> relationMapped = null;
+	public static List<String> timeWords = new ArrayList<String>();
+	public static String time = null;
 	
 	private static String prp = "Mac";
 	
 	private static Map<String, Object> graph = new HashMap<String, Object>();
 	private static RelationMapper rm;
+	static {
+		if(rm == null) {
+			rm = RelationMapper.getInstance();
+		}
+		InputStream inputStream = null;
+		Properties p = new Properties();   
+		 try {   
+			 inputStream = Object.class.getResourceAsStream("/data/timeWordsData");   
+			 p.load(inputStream);  
+			 String tws = p.getProperty("timeWords");
+			 String[] twl = tws.split(",");
+			 for(String tw : twl) {
+				 timeWords.add(tw);
+			 }
+		 } catch (IOException e1) {   
+			 e1.printStackTrace();   
+		 } finally {
+			 if(inputStream != null) {
+				 try {
+					inputStream.close();
+				} catch (IOException e) {					
+					e.printStackTrace();
+				}
+			 }
+		 }
+	}
+	
 	public static void init(String queryStr, String prpStr) {
 		prp = prpStr;
-		init(queryStr);
+		
+		init(queryStr);				
+		 
 	}
+	
+	private static String dateP = "(\\d{2,4}[-|/]\\d{1,2}[-|/]\\d{1,2}( +\\d{1,2}:\\d{1,2}(:\\d{1,2}){0,1}){0,1}( *to *((\\d{2,4}[-|/]\\d{1,2}[-|/]\\d{1,2}){0,1}( *\\d{1,2}:\\d{1,2}(:\\d{1,2}){0,1}){0,1})){0,1})";
+	private static String timeP = "(\\d{1,2}:\\d{1,2}(:\\d{1,2}){0,1}( *to *(\\d{1,2}:\\d{1,2}(:\\d{1,2}){0,1})))";
+
 	
 	/**
 	 * init all static paramters 
 	 * @param queryStr
 	 */
-	public static void init(String queryStr) {
-		if(rm == null) {
-			rm = RelationMapper.getInstance();
-		}
+	public static void init(String queryStr) {		
 		graph.put("startP", startP);
 		graph.put("endP", endP);
+		if(relationMapped != null) {
+			relationMapped.clear();
+		}
 		graph.put("relation", relationMapped);
+		graph.put("time", time);
 		
 		tagged = getTaggedStr(queryStr.toLowerCase());
 		System.out.println(tagged);
+		untaggedA = queryStr.toLowerCase().split(" ");
 		taggedA = tagged.split(" ");
 		len = taggedA.length;
 		startP = null;
 		endP = null;
 		relation = null;
+		time = getTime(queryStr.toLowerCase());
 		numNN = 0;
 		numVB = 0;
 		firstVB = null;
@@ -85,6 +132,45 @@ public class Tagger {
 		secondNNindex = 0;
 		thrdNN = null;
 		thrdNNindex = 0;
+	}
+	
+	private static String getTime(String src) {
+		String result = null;
+		result = getDateTime(src);
+		if(result != null && result.contains("to")) {
+			return result;
+		}
+		Pattern pattern = Pattern.compile(timeP);
+		Matcher matcher = pattern.matcher(src);
+		
+		if(matcher.find()) {			
+			if(result != null ) {
+				result += " " + matcher.group(1);
+				return result;
+			} else if(result == null) {
+				result = matcher.group(1);
+			}			
+		} 
+		//have no specified time/date.check words
+		if(result == null) {
+			for(String s : untaggedA) {
+				if(timeWords.contains(s)){
+					return s;
+				}
+			}
+		}
+		return result;
+	}
+
+	private static String getDateTime(String src) {
+		Pattern pattern = Pattern.compile(dateP);
+		Matcher matcher = pattern.matcher(src);
+		String result = null;
+		if (matcher.find()) {
+			result = matcher.group(1);						
+		} 
+		
+		return result;
 	}
 	
 	private static String getTaggedStr(String src) {
@@ -248,8 +334,13 @@ public class Tagger {
 		} else {
 			relation = firstVB;
 		}
+		if(firstVB != null && firstVB.split(" ").length == 1) {
+			relation += " " + firstNN;
+		}
 		
-		relationMapped = rm.mappingRelation(StopWords.stop(relation));
+		if(relation != null) {
+			relationMapped = rm.mappingRelation(StopWords.stop(relation));
+		}		
 		endP = firstNN;
 		startP = secondNN;
 	}
@@ -300,6 +391,7 @@ public class Tagger {
 			t += s + "\n";
 		}
 		t += "\nendP: " + endP;
+		t += "\ntime: " + time;
 		System.out.println(t);
 	}
 	
@@ -310,7 +402,7 @@ public class Tagger {
 	public static void main(String[] args) {
 		// http://www.computing.dcu.ie/~acahill/tagset.html the tagger 
 
-		String sample = "Tom who have meeting call with peter";		 
+		String sample = "Tom who have meeting call with peter 3113/2/23 to 2014-1-2";		 
 		Tagger.init(sample, "Mac");
 		Tagger.analysis();
 		if(!Tagger.isSimple()) {
@@ -318,43 +410,44 @@ public class Tagger {
 		}				
 		Tagger.printTarget();
 		System.out.println("-----------------------------------------------------");	
-		//----------------------------------------------------------------------------
-		// Someone who i meet with between 2012 to 2013 
-		sample = "Vagou who I have content share with";		 
-		Tagger.init(sample, "Mac");
-		Tagger.analysis();
-		if(!Tagger.isSimple()) {
-			System.err.println("Your query is too complex to analysis");
-		}				
-		Tagger.printTarget();
-		System.out.println("-----------------------------------------------------");
-		//----------------------------------------------------------------------------
-		sample = "Vagou who I do have meeting";		 
-		Tagger.init(sample, "Mac");
-		Tagger.analysis();
-		if(!Tagger.isSimple()) {
-			System.err.println("Your query is too complex to analysis");
-		}				
-		Tagger.printTarget();
-		System.out.println("-----------------------------------------------------");
-		//----------------------------------------------------------------------------
-		sample = "Vagou who I  have a conference call with";		 
-		Tagger.init(sample, "Mac");
-		Tagger.analysis();
-		if(!Tagger.isSimple()) {
-			System.err.println("Your query is too complex to analysis");
-		}				
-		Tagger.printTarget();
-		System.out.println("-----------------------------------------------------");
-		//----------------------------------------------------------------------------
-		sample = "Vagou who I  have conference call with";		 
-		Tagger.init(sample, "Mac");
-		Tagger.analysis();
-		if(!Tagger.isSimple()) {
-			System.err.println("Your query is too complex to analysis");
-		}				
-		Tagger.printTarget();
-		System.out.println("-----------------------------------------------------");
+//		//----------------------------------------------------------------------------
+//		// Someone who i meet with between 2012 to 2013 
+//		sample = "Vagou who I have content share with";		 
+//		Tagger.init(sample, "Mac");
+//		Tagger.analysis();
+//		if(!Tagger.isSimple()) {
+//			System.err.println("Your query is too complex to analysis");
+//		}				
+//		Tagger.printTarget();
+//		System.out.println("-----------------------------------------------------");
+//		//----------------------------------------------------------------------------
+//		sample = "Vagou who I do have meeting";		 
+//		Tagger.init(sample, "Mac");
+//		Tagger.analysis();
+//		if(!Tagger.isSimple()) {
+//			System.err.println("Your query is too complex to analysis");
+//		}				
+//		Tagger.printTarget();
+//		System.out.println("-----------------------------------------------------");
+//		//----------------------------------------------------------------------------
+//		sample = "Vagou who I  have a conference call with";		 
+//		Tagger.init(sample, "Mac");
+//		Tagger.analysis();
+//		if(!Tagger.isSimple()) {
+//			System.err.println("Your query is too complex to analysis");
+//		}				
+//		Tagger.printTarget();
+//		System.out.println("-----------------------------------------------------");
+//		//----------------------------------------------------------------------------
+//		sample = "meeting i have";		 
+//		Tagger.init(sample, "Mac");
+//		Tagger.analysis();
+//		if(!Tagger.isSimple()) {
+//			System.err.println("Your query is too complex to analysis");
+//		}				
+//		Tagger.printTarget();
+//		System.out.println("-----------------------------------------------------");
+
 	}
 
 }
