@@ -153,12 +153,19 @@ public class Tagger {
 		} 
 		//have no specified time/date.check words
 		if(result == null) {
-			for(String s : untaggedA) {
-				if(timeWords.contains(s)){
-					return s;
+			for(int i = 0 ; i < len; i++) {
+				if(timeWords.contains(untaggedA[i])){
+					return untaggedA[i];
+				} else if((untaggedA[i].equals("past") || untaggedA[i].equals("last"))) {
+					if(isNummber(taggedA[i+1])) {
+						return untaggedA[i] + " " + untaggedA[i+1] + " " + untaggedA[i+2];
+					} else if(isNN(taggedA[i+1])){
+						return untaggedA[i] + " " + untaggedA[i+1];
+					}
 				}
 			}
 		}
+		
 		return result;
 	}
 
@@ -189,6 +196,9 @@ public class Tagger {
 		return word.substring(0, word.indexOf("_"));
 	}
 	
+	private static boolean isNummber(String word) {
+		return word.indexOf("_CD") > 0;
+	}
 	/**
 	 * analysis the content String to split out those key words.  including vb and nn
 	 * then generate a result startP/endP/relation
@@ -402,7 +412,7 @@ public class Tagger {
 	public static void main(String[] args) {
 		// http://www.computing.dcu.ie/~acahill/tagset.html the tagger 
 
-		String sample = "Tom who have meeting call with peter 3113/2/23 to 2014-1-2";		 
+		String sample = "Tom who have meeting call with peter last week";		 
 		Tagger.init(sample, "Mac");
 		Tagger.analysis();
 		if(!Tagger.isSimple()) {
@@ -410,43 +420,43 @@ public class Tagger {
 		}				
 		Tagger.printTarget();
 		System.out.println("-----------------------------------------------------");	
-//		//----------------------------------------------------------------------------
-//		// Someone who i meet with between 2012 to 2013 
-//		sample = "Vagou who I have content share with";		 
-//		Tagger.init(sample, "Mac");
-//		Tagger.analysis();
-//		if(!Tagger.isSimple()) {
-//			System.err.println("Your query is too complex to analysis");
-//		}				
-//		Tagger.printTarget();
-//		System.out.println("-----------------------------------------------------");
-//		//----------------------------------------------------------------------------
-//		sample = "Vagou who I do have meeting";		 
-//		Tagger.init(sample, "Mac");
-//		Tagger.analysis();
-//		if(!Tagger.isSimple()) {
-//			System.err.println("Your query is too complex to analysis");
-//		}				
-//		Tagger.printTarget();
-//		System.out.println("-----------------------------------------------------");
-//		//----------------------------------------------------------------------------
-//		sample = "Vagou who I  have a conference call with";		 
-//		Tagger.init(sample, "Mac");
-//		Tagger.analysis();
-//		if(!Tagger.isSimple()) {
-//			System.err.println("Your query is too complex to analysis");
-//		}				
-//		Tagger.printTarget();
-//		System.out.println("-----------------------------------------------------");
-//		//----------------------------------------------------------------------------
-//		sample = "meeting i have";		 
-//		Tagger.init(sample, "Mac");
-//		Tagger.analysis();
-//		if(!Tagger.isSimple()) {
-//			System.err.println("Your query is too complex to analysis");
-//		}				
-//		Tagger.printTarget();
-//		System.out.println("-----------------------------------------------------");
+		//----------------------------------------------------------------------------
+		// Someone who i meet with between 2012 to 2013 
+		sample = "Vagou who I have content share with past 4 day";		 
+		Tagger.init(sample, "Mac");
+		Tagger.analysis();
+		if(!Tagger.isSimple()) {
+			System.err.println("Your query is too complex to analysis");
+		}				
+		Tagger.printTarget();
+		System.out.println("-----------------------------------------------------");
+		//----------------------------------------------------------------------------
+		sample = "Vagou who I do have meeting 2013-2-3 23:3:4 to 2013-2-4 23:3:4";		 
+		Tagger.init(sample, "Mac");
+		Tagger.analysis();
+		if(!Tagger.isSimple()) {
+			System.err.println("Your query is too complex to analysis");
+		}				
+		Tagger.printTarget();
+		System.out.println("-----------------------------------------------------");
+		//----------------------------------------------------------------------------
+		sample = "Vagou who I  have a conference call with 23:3:4 to 34:34";		 
+		Tagger.init(sample, "Mac");
+		Tagger.analysis();
+		if(!Tagger.isSimple()) {
+			System.err.println("Your query is too complex to analysis");
+		}				
+		Tagger.printTarget();
+		System.out.println("-----------------------------------------------------");
+		//----------------------------------------------------------------------------
+		sample = "meeting i have 2014/1/4 3:34 to 4:56";		 
+		Tagger.init(sample, "Mac");
+		Tagger.analysis();
+		if(!Tagger.isSimple()) {
+			System.err.println("Your query is too complex to analysis");
+		}				
+		Tagger.printTarget();
+		System.out.println("-----------------------------------------------------");
 
 	}
 
