@@ -1,7 +1,5 @@
 package com.cisco.css.query;
 
-import java.io.File;
-import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
@@ -91,8 +89,8 @@ public class Tagger {
 		 
 	}
 	
-	private static String dateP = "(\\d{2,4}[-|/]\\d{1,2}[-|/]\\d{1,2}( +\\d{1,2}:\\d{1,2}(:\\d{1,2}){0,1}){0,1}( *to *((\\d{2,4}[-|/]\\d{1,2}[-|/]\\d{1,2}){0,1}( *\\d{1,2}:\\d{1,2}(:\\d{1,2}){0,1}){0,1})){0,1})";
-	private static String timeP = "(\\d{1,2}:\\d{1,2}(:\\d{1,2}){0,1}( *to *(\\d{1,2}:\\d{1,2}(:\\d{1,2}){0,1})))";
+	private static String dateP = "(\\d{2,4}[-|/]\\d{1,2}[-|/]\\d{1,2}( +\\d{1,2}:\\d{1,2}(:\\d{1,2}){0,1}){0,1}( *(to|and|or) *((\\d{2,4}[-|/]\\d{1,2}[-|/]\\d{1,2}){0,1}( *\\d{1,2}:\\d{1,2}(:\\d{1,2}){0,1}){0,1})){0,1})";
+	private static String timeP = "(\\d{1,2}:\\d{1,2}(:\\d{1,2}){0,1}( *(to|and|or) *(\\d{1,2}:\\d{1,2}(:\\d{1,2}){0,1})){0,1})";
 
 	
 	/**
@@ -137,9 +135,19 @@ public class Tagger {
 	private static String getTime(String src) {
 		String result = null;
 		result = getDateTime(src);
-		if(result != null && result.contains("to")) {
-			return result;
+	
+		if(result != null) {
+			if(!result.contains("to") && (src.contains(" since ") || src.contains(" from "))) {
+				return result = "since " + result;
+			}
+			if(result.contains("and") && src.contains(" between ")) {
+				return result = "between " + result;
+			}
+			if(result.contains("and") || result.contains("or") || result.contains("to")) {
+				return result;
+			}
 		}
+		
 		Pattern pattern = Pattern.compile(timeP);
 		Matcher matcher = pattern.matcher(src);
 		
@@ -151,6 +159,16 @@ public class Tagger {
 				result = matcher.group(1);
 			}			
 		} 
+		
+		if(result != null) {
+			if(!result.contains("to") && (src.contains(" since ") || src.contains(" from "))) {
+				return result = "since " + result;
+			}
+			if(result.contains("and") && src.contains(" between ")) {
+				return result = "between " + result;
+			}
+		}
+		
 		//have no specified time/date.check words
 		if(result == null) {
 			for(int i = 0 ; i < len; i++) {
@@ -165,6 +183,8 @@ public class Tagger {
 				}
 			}
 		}
+		
+		
 		
 		return result;
 	}
@@ -449,7 +469,7 @@ public class Tagger {
 		Tagger.printTarget();
 		System.out.println("-----------------------------------------------------");
 		//----------------------------------------------------------------------------
-		sample = "meeting i have 2014/1/4 3:34 to 4:56";		 
+		sample = "meeting i have from 13/12/1";		 
 		Tagger.init(sample, "Mac");
 		Tagger.analysis();
 		if(!Tagger.isSimple()) {
