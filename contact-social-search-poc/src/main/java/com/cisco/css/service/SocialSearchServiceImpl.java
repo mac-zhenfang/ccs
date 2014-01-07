@@ -27,15 +27,14 @@ import com.cisco.css.store.SocialGraphStore;
  */
 @Service("socialSearchService")
 public class SocialSearchServiceImpl implements SocialSearchService {
-	
+
 	private static final Logger logger = LoggerFactory
 			.getLogger(SocialSearchServiceImpl.class);
 	private static SocialSearchServiceImpl service = new SocialSearchServiceImpl();
-	
-	public static SocialSearchServiceImpl getService(){
+
+	public static SocialSearchServiceImpl getService() {
 		return service;
 	}
-	
 
 	@Override
 	public List<Person> query(String queryStr) {
@@ -43,10 +42,9 @@ public class SocialSearchServiceImpl implements SocialSearchService {
 		return this.queryPersons(queryStr);
 	}
 
-	
 	@Override
 	public List<Person> getPersons(String userName) {
-		List<Person> rtList = new ArrayList<Person> ();
+		List<Person> rtList = new ArrayList<Person>();
 		List<Person> persons = PersonStore.getStore().getFullPersons();
 		Map<String, Person> similarPersons = new HashMap<String, Person>();
 		for (Person person : persons) {
@@ -58,50 +56,53 @@ public class SocialSearchServiceImpl implements SocialSearchService {
 		return rtList;
 	}
 
-
 	@Override
 	public Person getPerson(String uuid) {
 		Person mePerson = PersonStore.getStore().get(uuid).get(0);
 		return mePerson;
 	}
-	
-	
+
 	public List<Person> queryPersons(String queryStr) {
 		Tagger.init(queryStr, PersonStore.getStore().getMe().getUserName());
 		Tagger.analysis();
-		if(!Tagger.isSimple()) {
+		if (!Tagger.isSimple()) {
 			System.err.println("Your query is too complex to analysis");
 		}
-		return this.queryPersons(Tagger.startP, Tagger.relationMapped, Tagger.endP);
+		return this.queryPersons(Tagger.startP, Tagger.relationMapped,
+				Tagger.endP);
 	}
 
-	public List<Person> queryPersons(String subject, List<String> relation, String endP) {
+	public List<Person> queryPersons(String subject, List<String> relation,
+			String endP) {
 
 		// parse the relation to string, suppose relation is "have meeting",
 		// hard coded
-		if(relation.size() > 1) {
-			//TODO
-			throw new RuntimeException("not support yet");
-		}
-		String relationStr = relation.get(0);
-		String relat = subject + " " + relationStr;
-		String[] relas = relat.split(" ");
+//		if (relation.size() > 1) {
+//			// TODO
+//			throw new RuntimeException("not support yet");
+//		}
+
+		// String relat = subject + " " + relationStr;
+		// String[] relas = relat.split(" ");
 		//
 		List<ActivityType> types = new ArrayList<ActivityType>();
-		for (String rela : relas) {
+
+		for (String rela : relation) {
 			ActivityType type = ActivityTypeStore.getStore().getActivityType(
 					rela);
 			if (null != type) {
 				types.add(type);
 			}
 		}
-		if (types.size() != 1) {
-			throw new RuntimeException(" this is wrong parsing, please check "
-					+ relation);
-		}
+		// if (types.size() != 1) {
+		// throw new RuntimeException(" this is wrong parsing, please check "
+		// + relation);
+		// }
+
 		// FIXME
 		Person mePerson = PersonStore.getStore().getMe();
 		logger.info(mePerson.toString());
+		Map<String, Person> retMap = new HashMap<String, Person>();
 		// use endP to find similar persons, FIXME we need to use better data
 		// structure rather than List, like Trie
 		List<Person> persons = PersonStore.getStore().getFullPersons();
@@ -111,6 +112,7 @@ public class SocialSearchServiceImpl implements SocialSearchService {
 				similarPersons.put(person.getId(), person);
 			}
 		}
+
 		List<Person> relatedPersons = SocialGraphStore.getStore().query2(types,
 				mePerson, similarPersons.keySet());
 		// check if related person is in the similar persons
@@ -120,25 +122,21 @@ public class SocialSearchServiceImpl implements SocialSearchService {
 
 		return relatedPersons;
 	}
-	
 
 	@Override
 	public List<Relation> getRelations(String personId) {
 		return SocialGraphStore.getStore().queryRelation(personId, null);
 	}
 
-
 	@Override
 	public List<Relation> getAllRelations() {
 		return SocialGraphStore.getStore().queryAllRelations();
 	}
 
-
 	@Override
 	public List<Relation> getRelations(String fromId, String toId) {
-		
-		return  SocialGraphStore.getStore().queryRelation(fromId, toId);
-	}
 
+		return SocialGraphStore.getStore().queryRelation(fromId, toId);
+	}
 
 }

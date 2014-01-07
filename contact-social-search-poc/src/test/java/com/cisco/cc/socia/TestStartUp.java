@@ -179,11 +179,11 @@ public class TestStartUp {
 
 	@Test
 	public void testInitGraph() {
-		PersonStore.getStore().prepareData();
+		PersonStore.getStore().init();
 
-		ActivityTypeStore.getStore().prepareData();
+		ActivityTypeStore.getStore().init();
 
-		ActivityStreamStore.getStore().prepareData();
+		ActivityStreamStore.getStore().init();
 
 		SocialGraphStore.getStore().prepareData();
 
