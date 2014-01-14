@@ -20,11 +20,14 @@ public class Tagger {
 	 * PRP--Personal Pronoun e.g. I, me, you, he..
 	 * VB--Verb, base form 
 	 * VB*--
+	 * more tags find at http://www.computing.dcu.ie/~acahill/tagset.html
 	 * 
 	 */
 	private static MaxentTagger tagger = new MaxentTagger("taggers/english-caseless-left3words-distsim.tagger");
 	private static String tagged;
+	//split words of tagged query sentence
 	private static String[] taggedA;
+	//split words of un-tagged query sentence
 	private static String[] untaggedA;
 	private static int len;
 	private static String firstVB = null;
@@ -55,6 +58,8 @@ public class Tagger {
 	
 	private static Map<String, Object> graph = new HashMap<String, Object>();
 	private static RelationMapper rm;
+	
+	//init some resources
 	static {
 		if(rm == null) {
 			rm = RelationMapper.getInstance();
@@ -89,12 +94,14 @@ public class Tagger {
 		 
 	}
 	
+	//pattern for date started string 
 	private static String dateP = "(\\d{2,4}[-|/]\\d{1,2}[-|/]\\d{1,2}( +\\d{1,2}:\\d{1,2}(:\\d{1,2}){0,1}){0,1}( *(to|and|or) *((\\d{2,4}[-|/]\\d{1,2}[-|/]\\d{1,2}){0,1}( *\\d{1,2}:\\d{1,2}(:\\d{1,2}){0,1}){0,1})){0,1})";
+	//pattern for time started string
 	private static String timeP = "(\\d{1,2}:\\d{1,2}(:\\d{1,2}){0,1}( *(to|and|or) *(\\d{1,2}:\\d{1,2}(:\\d{1,2}){0,1})){0,1})";
 
 	
 	/**
-	 * init all static paramters 
+	 * init or reset  all static paramters 
 	 * @param queryStr
 	 */
 	public static void init(String queryStr) {		
@@ -114,6 +121,7 @@ public class Tagger {
 		startP = null;
 		endP = null;
 		relation = null;
+		//get some time related words from query sentence
 		time = getTime(queryStr.toLowerCase());
 		numNN = 0;
 		numVB = 0;
@@ -132,8 +140,14 @@ public class Tagger {
 		thrdNNindex = 0;
 	}
 	
+	/**
+	 * get time related words from query sentence, including digital time and words
+	 * @param src
+	 * @return
+	 */
 	private static String getTime(String src) {
 		String result = null;
+		//get digital time started with date
 		result = getDateTime(src);
 	
 		if(result != null) {
@@ -148,6 +162,7 @@ public class Tagger {
 			}
 		}
 		
+		//get digital time started with time
 		Pattern pattern = Pattern.compile(timeP);
 		Matcher matcher = pattern.matcher(src);
 		
@@ -169,7 +184,7 @@ public class Tagger {
 			}
 		}
 		
-		//have no specified time/date.check words
+		//have no specified digital time/date. check words
 		if(result == null) {
 			for(int i = 0 ; i < len; i++) {
 				if(timeWords.contains(untaggedA[i])){
@@ -183,8 +198,6 @@ public class Tagger {
 				}
 			}
 		}
-		
-		
 		
 		return result;
 	}
@@ -221,8 +234,9 @@ public class Tagger {
 	}
 	/**
 	 * analysis the content String to split out those key words.  including vb and nn
-	 * then generate a result startP/endP/relation
-	 * 
+	 * then generate a result startP/endP/relation. mapping the relation key word in 
+	 * query sentence to a internal relations list
+	 *  key point: find the first VB and NN. NN many connect with a VB and some determiner words
 	 */
 	public static void analysis() {
 		int vbCount = 0;
@@ -347,6 +361,14 @@ public class Tagger {
 		return 0;
 	}
 
+	/**
+	 * firstNN is the target that user want to query
+	 * firstVB always connect with internal relation words,so extract the phrase as original 'relation'
+	 * secondVB is no used now
+	 * secondNN at most time is the node that connect to firstNN through 'relation'
+	 * 
+	 * for simple query sentence, firstNN/secondNN extract easyly
+	 */
 	private static void generate() {
 		if(numNN == 1) {
 			
