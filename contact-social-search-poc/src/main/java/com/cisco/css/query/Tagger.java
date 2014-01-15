@@ -21,6 +21,10 @@ public class Tagger {
 	 * VB--Verb, base form 
 	 * VB*--
 	 * more tags find at http://www.computing.dcu.ie/~acahill/tagset.html
+	 * Stanford Log-linear Part-Of-Speech Tagger website: http://nlp.stanford.edu/downloads/tagger.shtml
+	 * 
+	 * the tagger Accuracy is about 96% ref by article:
+	 * "Enriching the Knowledge Sources Used in a Maximum Entropy Part-of-Speech Tagger"
 	 * 
 	 */
 	private static MaxentTagger tagger = new MaxentTagger("taggers/english-caseless-left3words-distsim.tagger");
