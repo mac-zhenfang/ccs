@@ -12,6 +12,12 @@ import java.util.Properties;
 import com.cisco.css.store.ActivityType;
 import com.cisco.css.store.ActivityTypeStore;
 
+/**
+ *  covert user input relation key word to internal relation word
+ *  
+ * @author brui
+ *
+ */
 public class RelationMapper {
 
 	private static ActivityTypeStore activities = new ActivityTypeStore();
@@ -75,6 +81,7 @@ public class RelationMapper {
 	}
 	
 	/**
+	 * 
 	 * mapping a word to a existed relationship(activity)
 	 * @param word
 	 * @return
@@ -91,6 +98,12 @@ public class RelationMapper {
 		return getMax(calculateWeigth(word, stems));
 	}
 	
+	/**
+	 * calculate the distance between input query key word and internal relation word
+	 * @param word
+	 * @param stems
+	 * @return
+	 */
 	private static Map<String, Double> calculateWeigth(String word, List<String> stems) {
 		Map<String, Double> mapperW = initMapper();
 		Double max = 0d;
@@ -117,7 +130,15 @@ public class RelationMapper {
 		return mapperW;
 	}
 
+	/**
+	 * got max similarity for each internal relation word
+	 * @param key
+	 * @param word
+	 * @param stems
+	 * @return
+	 */
 	private static Double maxSimilar(String key, String word, List<String> stems) {
+		//calculate distance of 'word' and 'key'
 		Double max = StringDistance.LevenshteinDistancePercent(word, key);
 
 		//DOTO: some improvement should be implemented 

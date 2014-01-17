@@ -1,5 +1,11 @@
 package com.cisco.css.query;
 
+/**
+ *  a string distance measure algorithm-LevenshteinDistance
+ *  
+ * @author brui
+ *
+ */
 public class StringDistance {	
 	
 	private static int LowerOfThree(int first, int second, int third)
@@ -65,7 +71,7 @@ public class StringDistance {
 
 
     /**
-     * LevenshteinDistance fro str1 and str2
+     * LevenshteinDistance for str1 and str2
      * @param str1
      * @param str2
      * @return
